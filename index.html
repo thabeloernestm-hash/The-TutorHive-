@@ -1,0 +1,2920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Tutorhive • STEM & Math Lit Learning Portal</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+        padding: 20px;
+      }
+      .no-print { display: none !important; }
+    }
+  </style>
+  <!-- PWA & Mobile Meta Tags -->
+  <meta name="theme-color" content="#f59e0b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="The Tutorhive">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+</head>
+<body class="bg-amber-50/20 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform -translate-y-12 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2">
+    <span class="text-emerald-400">✓</span>
+    <span id="toast-message">Action successful</span>
+  </div>
+
+  <!-- Navigation Header -->
+  <header class="bg-white border-b border-amber-200/80 sticky top-0 z-20 shadow-xs no-print">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div id="bee-logo-trigger" class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-2xl shadow-sm border border-amber-300 ring-2 ring-amber-200/60 cursor-pointer select-none transition active:scale-90" title="The Tutorhive">
+          🐝
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-lg text-slate-950 leading-tight tracking-tight">The Tutorhive</h1>
+            <span id="role-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-100 text-amber-900 border border-amber-300">Grade 10–12 FET</span>
+          </div>
+          <p class="text-xs text-amber-900/80 font-medium">Maths, Physical Sciences &amp; Math Lit Learning Hive 🐝</p>
+        </div>
+      </div>
+      
+      <!-- Role Toggle & Action Buttons in Nav -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Learner Status Badge (Visible by default) -->
+        <div id="learner-nav-pill" class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold shadow-2xs">
+            <span>⚡</span>
+            <span>Offline Ready</span>
+          </span>
+        </div>
+
+        <!-- Educator Actions (Visible only in Back-End Educator Mode) -->
+        <div id="educator-nav-actions" class="hidden flex items-center gap-2">
+          <button id="btn-open-add-concept" class="px-3 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold shadow-xs flex items-center gap-1.5 border border-amber-500/30 transition">
+            <span>+</span>
+            <span>Add Concept</span>
+          </button>
+          <button id="btn-open-add-material" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">
+            <span>📁</span>
+            <span>Add Material</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Educator Mode Notification Banner (Visible in Back-End Mode) -->
+  <div id="educator-banner" class="hidden bg-emerald-50 border-b border-emerald-200 py-2.5 px-4 no-print">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-emerald-900">
+      <div class="flex items-center gap-2">
+        <span class="font-bold uppercase tracking-wider bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded shadow-2xs">Back-End Console</span>
+        <span>You are authenticated as the <strong>Back-End Administrator</strong>. Only you can edit concepts, explanations, and upload materials.</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btn-export-curriculum" class="text-[11px] px-2 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-300 font-semibold transition" title="Download a backup file of your custom curriculum">💾 Export Backup</button>
+        <input type="file" id="input-import-curriculum" accept=".json" class="hidden">
+        <button id="btn-import-curriculum" class="text-[11px] px-2 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-300 font-semibold transition" title="Upload a previously saved curriculum backup">📥 Import Backup</button>
+        <button id="btn-reset-defaults" class="text-[11px] px-2 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-300 font-semibold transition" title="Restore original CAPS curriculum demo content">Restore Defaults</button>
+        <button id="btn-switch-learner-banner" class="text-xs font-bold underline hover:text-emerald-950 self-start sm:self-auto">Switch back to Learner Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto px-4 py-6 flex-1 w-full space-y-6 no-print">
+
+    <!-- Front-End Welcome Banner for Learners -->
+    <div id="learner-welcome-banner" class="bg-gradient-to-r from-amber-400/20 via-yellow-200/25 to-amber-50 p-4 rounded-2xl border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-slate-950">Learner Download, Solver &amp; Timed Exam Hive</span>
+          <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-400 text-slate-950 border border-amber-500/40 rounded-full">CAPS FET Phase</span>
+        </div>
+        <p class="text-xs text-slate-700 mt-1">Select a subject below to explore interactive concepts, download official study guides, solve calculations step-by-step, or take a <strong>timed practice exam with CAPS report cards</strong>.</p>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-amber-900 font-medium self-start sm:self-auto shrink-0 bg-white/90 px-3 py-1.5 rounded-xl border border-amber-200 shadow-2xs">
+        <span class="text-amber-600 font-bold">✓</span>
+        <span>Free Offline Downloads</span>
+      </div>
+    </div>
+
+    <!-- Subject Switcher -->
+    <div>
+      <div class="flex items-center justify-between mb-2.5">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-500">Select a Subject</div>
+        <div class="text-xs text-slate-500">Switch subject to view concepts, downloadable materials &amp; solvers</div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="subject-tabs">
+        <!-- Mathematics Tab -->
+        <button id="tab-maths" class="subject-tab active text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white border-amber-500 shadow-sm ring-2 ring-amber-200 bg-amber-50/20">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700">Core Subject</span>
+            <span class="text-lg">📐</span>
+          </div>
+          <div class="font-bold text-slate-900 text-base">Mathematics</div>
+          <div class="text-xs text-slate-500 mt-0.5">Algebra, calculus, trigonometry &amp; graphs</div>
+        </button>
+
+        <!-- Physical Sciences Tab -->
+        <button id="tab-physics" class="subject-tab text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white border-slate-200 hover:border-slate-300">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Physics &amp; Chem</span>
+            <span class="text-lg">⚡</span>
+          </div>
+          <div class="font-bold text-slate-900 text-base">Physical Sciences</div>
+          <div class="text-xs text-slate-500 mt-0.5">Mechanics, chemistry, waves &amp; energy</div>
+        </button>
+
+        <!-- Mathematical Literacy Tab -->
+        <button id="tab-mathlit" class="subject-tab text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white border-slate-200 hover:border-slate-300">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Real-World Maths</span>
+            <span class="text-lg">📊</span>
+          </div>
+          <div class="font-bold text-slate-900 text-base">Mathematical Literacy</div>
+          <div class="text-xs text-slate-500 mt-0.5">Finance, tariffs, measurements &amp; data</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Subject Content Box -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+      
+      <!-- Subject Header & View Switcher -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold" id="subject-badge">
+            Mathematics
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mt-1" id="subject-title">Mathematics Hub</h2>
+          <p class="text-sm text-slate-600 mt-0.5" id="subject-description">Master key algebraic principles, functions, and problem-solving patterns.</p>
+        </div>
+
+        <!-- Section Switcher: Concepts vs Study Materials vs Solvers vs Quiz -->
+        <div class="flex flex-wrap items-center bg-slate-100 p-1 rounded-xl self-start sm:self-center gap-1">
+          <button id="view-concepts-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-950 text-amber-400 font-bold shadow-xs flex items-center gap-1.5">
+            <span>💡</span>
+            <span>Concepts &amp; Practice</span>
+          </button>
+          <button id="view-materials-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+            <span>📚</span>
+            <span>Study Materials (<span id="materials-count-badge">3</span>)</span>
+          </button>
+          <button id="view-solvers-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+            <span>🧮</span>
+            <span>Step-by-Step Solvers</span>
+          </button>
+          <button id="view-quiz-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
+            <span>📝</span>
+            <span>Timed Exam Test</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Grade Filter Bar -->
+      <div class="flex items-center justify-between py-3 border-b border-slate-100 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-500 uppercase tracking-wider text-[11px]">Grade Level Filter:</span>
+          <div class="flex items-center gap-1.5" id="grade-filter-pills">
+            <button class="grade-pill active px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white transition" data-grade="all">All Grades (FET)</button>
+            <button class="grade-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition" data-grade="Grade 10">Grade 10</button>
+            <button class="grade-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition" data-grade="Grade 11">Grade 11</button>
+            <button class="grade-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition" data-grade="Grade 12">Grade 12 (Matric)</button>
+          </div>
+        </div>
+        <span class="text-slate-400 text-[11px] hidden md:inline">CAPS Curriculum Aligned</span>
+      </div>
+
+      <!-- VIEW 1: CONCEPTS & PRACTICE SECTION -->
+      <div id="section-concepts" class="space-y-6 mt-6">
+        
+        <!-- Topic Selector Filter & Add Concept Trigger -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap gap-1.5 items-center" id="topic-pills">
+            <!-- Populated dynamically via JS -->
+          </div>
+          <button id="btn-quick-add-concept" class="hidden text-xs font-semibold text-amber-700 hover:text-amber-900 font-bold flex items-center gap-1 transition">
+            <span>+ Add New Topic Concept</span>
+          </button>
+        </div>
+
+        <!-- Two-Column Study & Practice Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Left Column: Core Concept & Formula Card (7 cols) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="font-bold text-slate-900 text-base" id="card-concept-title">Concept Name</h3>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-medium px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-600" id="card-grade-tag">Grade 11-12</span>
+                  <button id="btn-edit-active-concept" class="hidden px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Edit this concept and explanations">
+                    <span>✏️</span>
+                    <span>Edit Concept</span>
+                  </button>
+                  <button id="btn-delete-active-concept" class="hidden px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Delete this concept">
+                    <span>🗑️</span>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+              
+              <p class="text-sm text-slate-600 leading-relaxed" id="card-concept-summary">
+                Concept summary description goes here.
+              </p>
+
+              <!-- Key Formula / Rule Highlight Box -->
+              <div class="mt-4 p-3.5 bg-white border rounded-lg border-amber-200 bg-amber-50/60">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Key Formula or Rule</div>
+                <div class="font-mono font-semibold text-slate-900 text-sm sm:text-base break-words" id="card-formula">
+                  x = [-b ± √(b² - 4ac)] / (2a)
+                </div>
+                <div class="text-xs text-slate-500 mt-1" id="card-formula-note">
+                  Use when a quadratic expression cannot be factored easily.
+                </div>
+              </div>
+
+              <!-- Practical Tip -->
+              <div class="mt-4 flex items-start gap-2.5 text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200">
+                <span class="text-base leading-none">💡</span>
+                <div>
+                  <strong class="text-slate-800">Exam Tip:</strong>
+                  <span id="card-tip">Always verify your discriminant (b² - 4ac) first to determine the nature of roots.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Quick Interactive Check (5 cols) -->
+          <div class="lg:col-span-5 flex flex-col justify-between bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Quick Check</span>
+                <span class="text-xs text-slate-500 font-medium" id="question-index">Concept Check</span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-sm sm:text-base leading-snug" id="question-text">
+                Question text goes here?
+              </h4>
+              
+              <!-- Options Container -->
+              <div class="mt-4 space-y-2" id="options-container">
+                <!-- Rendered via JS -->
+              </div>
+
+              <!-- Feedback Alert -->
+              <div id="feedback-box" class="hidden mt-3 p-3 rounded-lg text-xs leading-relaxed">
+                <!-- Feedback message -->
+              </div>
+            </div>
+
+            <!-- Bottom Action Controls -->
+            <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+              <button id="btn-next-concept" class="text-xs font-semibold text-amber-700 hover:text-amber-900 font-bold flex items-center gap-1 transition">
+                <span>Next Concept</span>
+                <span>→</span>
+              </button>
+              <div class="text-xs text-slate-500">
+                Score: <span id="score-counter" class="font-bold text-slate-800">0</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- VIEW 2: STUDY MATERIALS & RESOURCES SECTION -->
+      <div id="section-materials" class="hidden space-y-6 mt-6">
+        
+        <!-- Materials Header Banner -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-slate-900 text-sm">Downloadable Study Guides, Past Papers &amp; Summaries</h3>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Front-End Downloads</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Learners can read online or click <strong>Download</strong> to save the complete text or summary to their device for offline study.</p>
+          </div>
+          <button id="btn-add-material-trigger" class="hidden px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1 self-start sm:self-auto transition">
+            <span>+</span>
+            <span>Upload / Add New Study Material</span>
+          </button>
+        </div>
+
+        <!-- Materials Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="materials-container">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+      </div>
+
+      <!-- VIEW 3: STEP-BY-STEP SOLVERS SECTION -->
+      <div id="section-solvers" class="hidden space-y-6 mt-6">
+        
+        <!-- Solver Header Banner -->
+        <div class="bg-amber-50/70 border border-amber-200 p-4 rounded-xl flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base">🧮</span>
+              <h3 class="font-bold text-slate-900 text-sm" id="solver-heading">Subject Step-by-Step Solver</h3>
+            </div>
+            <p class="text-xs text-slate-600 mt-0.5" id="solver-subheading">Enter your problem values below to see the complete algebraic steps and final solution.</p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-amber-100 border border-amber-300 rounded-lg text-amber-950 font-bold">Live Engine</span>
+        </div>
+
+        <!-- Dynamic Solver Container -->
+        <div id="solver-container">
+          <!-- Populated dynamically according to active subject -->
+        </div>
+
+      </div>
+
+      <!-- VIEW 4: TIMED EXAM PRACTICE QUIZ SECTION (STEP 6) -->
+      <div id="section-quiz" class="hidden space-y-6 mt-6">
+        
+        <!-- Quiz Control Banner -->
+        <div class="bg-slate-950 text-white p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md border-2 border-amber-400/50">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wider mb-1">
+              Simulated Exam Mode 🐝
+            </div>
+            <h3 class="text-lg font-bold text-amber-400" id="quiz-subject-header">Mathematics Exam Practice</h3>
+            <p class="text-xs text-amber-200/80 mt-0.5">Answer the timed multi-topic exam questions to generate your official CAPS performance report card.</p>
+          </div>
+          
+          <!-- Timer Display -->
+          <div class="flex items-center gap-3 bg-slate-900 px-4 py-2.5 rounded-xl border border-amber-400/40">
+            <span class="text-xl">⏱</span>
+            <div>
+              <div class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Time Remaining</div>
+              <div class="font-mono text-xl font-bold text-amber-300" id="quiz-timer">05:00</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Quiz Card -->
+        <div id="quiz-question-box" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="quiz-step-indicator">Question 1 of 5</span>
+            <span class="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-950 font-bold rounded-lg border border-amber-300" id="quiz-question-topic">Algebra</span>
+          </div>
+
+          <h4 class="text-base font-bold text-slate-900 leading-snug" id="quiz-question-title">
+            Question text goes here
+          </h4>
+
+          <div class="space-y-2.5" id="quiz-options-container">
+            <!-- Options populated dynamically -->
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <button id="btn-quiz-prev" class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition" disabled>
+              ← Previous
+            </button>
+            <button id="btn-quiz-next" class="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border border-amber-500/30 text-xs font-bold shadow-xs transition">
+              Next Question →
+            </button>
+            <button id="btn-quiz-submit" class="hidden px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition">
+              Submit Exam &amp; View Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Quiz Performance Report Card (Shown after submit) -->
+        <div id="quiz-report-card" class="hidden bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+          <div class="text-center pb-4 border-b border-slate-100">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 text-2xl font-bold mb-2" id="report-badge-icon">
+              🏆
+            </div>
+            <h3 class="text-xl font-bold text-slate-900" id="report-title">Exam Performance Report Card</h3>
+            <p class="text-xs text-slate-500 mt-0.5" id="report-subtitle">Evaluated according to South African CAPS National Senior Certificate achievement levels.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+              <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Score</div>
+              <div class="text-2xl font-bold text-slate-900 mt-1" id="report-score">4 / 5 (80%)</div>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+              <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">CAPS Achievement Level</div>
+              <div class="text-xl font-bold text-amber-700 mt-1" id="report-level">Level 7 (Outstanding)</div>
+            </div>
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+              <div class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Time Taken</div>
+              <div class="text-xl font-bold text-slate-900 mt-1" id="report-time-taken">02:45</div>
+            </div>
+          </div>
+
+          <div class="p-4 bg-amber-50/80 rounded-xl border border-amber-200 text-xs text-slate-700 leading-relaxed" id="report-feedback">
+            Feedback summary
+          </div>
+
+          <!-- Question-by-Question Diagnostic Review -->
+          <div class="space-y-3 pt-2">
+            <div class="text-xs font-bold text-slate-900 uppercase tracking-wider">Diagnostic Question Review</div>
+            <div class="space-y-2.5" id="report-breakdown-list"></div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <button id="btn-download-report" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border border-amber-500/30 rounded-lg text-xs font-bold shadow-xs flex items-center gap-1.5 transition">
+              <span>⬇</span>
+              <span>Download Exam Report Card (.txt)</span>
+            </button>
+            <button id="btn-retake-quiz" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition">
+              Retake Exam Practice
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Quick Status / Progress Bar -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 shadow-xs">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+        <span>Review progress: <strong class="text-slate-800" id="progress-text">1 of 9 concepts explored</strong></span>
+      </div>
+      <div class="w-full sm:w-48 bg-slate-100 h-2 rounded-full overflow-hidden">
+        <div id="progress-bar" class="bg-amber-500 h-full w-[11%] transition-all duration-300"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: ADMIN ACCESS KEY / PIN LOGIN -->
+  <div id="modal-admin-login" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🔒</span>
+          <h3 class="font-bold text-slate-900 text-sm">🐝 Secret Admin Hive Access</h3>
+        </div>
+        <button id="btn-close-login-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 leading-none">&times;</button>
+      </div>
+      <p class="text-xs text-slate-500 mt-3 leading-relaxed">
+        Secret educator gateway unlocked via hive gesture. Enter your administrator PIN code to access editing controls.
+      </p>
+      <form id="form-admin-login" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Enter Admin PIN Code</label>
+          <input type="password" id="input-admin-pin" placeholder="Enter 6-digit PIN" required class="w-full p-2.5 border border-slate-200 rounded-lg text-xs font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <p class="text-[11px] text-slate-400 mt-1">Authorized administrator PIN protected</p>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" id="btn-cancel-login" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">Unlock Back-End</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 1: ADD NEW CONCEPT (BACK-END ONLY) -->
+  <div id="modal-add-concept" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-xl overflow-hidden border border-slate-100">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-concept-heading">Add New Learning Concept (Back-End)</h3>
+          <p class="text-xs text-slate-500" id="modal-concept-subheading">Create a study concept, formula, and practice check.</p>
+        </div>
+        <button id="btn-close-concept-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <form id="form-add-concept" class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs custom-scroll">
+        <input type="hidden" id="input-edit-concept-id" value="">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Target Subject *</label>
+            <select id="input-concept-subject" class="w-full p-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="maths">Mathematics</option>
+              <option value="physics">Physical Sciences</option>
+              <option value="mathlit">Mathematical Literacy</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Grade Level *</label>
+            <select id="input-concept-grade" class="w-full p-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="Grade 10">Grade 10</option>
+              <option value="Grade 11">Grade 11</option>
+              <option value="Grade 12" selected>Grade 12</option>
+              <option value="Grade 10-12">Grade 10-12 (All FET)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Topic Name *</label>
+            <input type="text" id="input-concept-topic" required placeholder="e.g. Euclidean Geometry" class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Concept Title *</label>
+            <input type="text" id="input-concept-title" required placeholder="e.g. Tan-Chord Theorem" class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Concept Summary &amp; Explanation *</label>
+          <textarea id="input-concept-summary" required rows="2" placeholder="Explain the key idea simply for learners..." class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Key Formula or Rule</label>
+            <input type="text" id="input-concept-formula" placeholder="e.g. ∠TAB = ∠BCA" class="w-full p-2 border border-slate-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Formula Note</label>
+            <input type="text" id="input-concept-formulanote" placeholder="e.g. Angle between tangent and chord..." class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Exam Tip</label>
+          <input type="text" id="input-concept-tip" placeholder="e.g. Look for cyclic quadrilaterals with tangents..." class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <!-- Practice Question Block -->
+        <div class="border-t border-slate-100 pt-3 space-y-3">
+          <div class="font-bold text-slate-800 text-xs">Mini Practice Question</div>
+          
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Question Prompt *</label>
+            <input type="text" id="input-concept-qprompt" required placeholder="e.g. What is the angle between tangent and chord equal to?" class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+
+          <div class="space-y-2">
+            <label class="block font-semibold text-slate-700">Multiple Choice Answers (Select which is correct)</label>
+            
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct_opt" value="0" checked id="opt0_radio" class="accent-amber-500 text-amber-500">
+              <input type="text" id="input-concept-opt0" required placeholder="Correct Answer option" class="flex-1 p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct_opt" value="1" id="opt1_radio" class="accent-amber-500 text-amber-500">
+              <input type="text" id="input-concept-opt1" required placeholder="Distractor option 1" class="flex-1 p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input type="radio" name="correct_opt" value="2" id="opt2_radio" class="accent-amber-500 text-amber-500">
+              <input type="text" id="input-concept-opt2" required placeholder="Distractor option 2" class="flex-1 p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Answer Explanation *</label>
+            <input type="text" id="input-concept-qexplanation" required placeholder="Why the correct option is right..." class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" id="btn-cancel-concept" class="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-amber-400 text-slate-950 font-bold hover:bg-amber-500 border border-amber-500/30 shadow-xs transition">Save Concept</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MODAL 2: UPLOAD & ADD STUDY MATERIAL (BACK-END ONLY) -->
+  <div id="modal-add-material" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-xl overflow-hidden border border-slate-100">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-emerald-50/50">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Upload Study Material (Back-End Admin)</h3>
+          <p class="text-xs text-slate-500">Upload notes, past exam papers, or formulas for front-end learners to download.</p>
+        </div>
+        <button id="btn-close-material-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 leading-none">&times;</button>
+      </div>
+
+      <form id="form-add-material" class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs custom-scroll">
+        
+        <!-- File Upload Dropzone -->
+        <div class="p-4 border-2 border-dashed border-emerald-300 rounded-xl bg-emerald-50/30 text-center hover:bg-emerald-50/60 transition cursor-pointer" id="dropzone-area">
+          <input type="file" id="input-material-file" accept=".txt,.md,.json,.pdf,.doc,.docx" class="hidden">
+          <span class="text-2xl block mb-1">📁</span>
+          <div class="font-bold text-slate-800 text-xs">Choose or drop a study file from your computer</div>
+          <div class="text-[11px] text-slate-500 mt-0.5">Supports text notes, Markdown, summary sheets (.txt, .md)</div>
+          <button type="button" id="btn-select-file" class="mt-2.5 px-3 py-1 bg-white border border-emerald-300 rounded-lg text-emerald-700 font-semibold text-xs shadow-2xs hover:bg-emerald-50 transition">
+            Browse Computer Files
+          </button>
+          <div id="file-selected-name" class="hidden mt-2 text-xs font-semibold text-emerald-800 bg-white p-1.5 rounded border border-emerald-200"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Subject *</label>
+            <select id="input-material-subject" class="w-full p-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="maths">Mathematics</option>
+              <option value="physics">Physical Sciences</option>
+              <option value="mathlit">Mathematical Literacy</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Resource Category *</label>
+            <select id="input-material-type" class="w-full p-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="Revision Notes">Revision Notes</option>
+              <option value="Past Exam Paper">Past Exam Paper</option>
+              <option value="Formula Sheet">Formula Sheet</option>
+              <option value="Worked Solutions">Worked Solutions</option>
+              <option value="Video Tutorial">Video Tutorial</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Material Title *</label>
+          <input type="text" id="input-material-title" required placeholder="e.g. CAPS Grade 12 Calculus Master Notes" class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Grade Level *</label>
+            <select id="input-material-grade" class="w-full p-2 border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="Grade 12" selected>Grade 12</option>
+              <option value="Grade 11">Grade 11</option>
+              <option value="Grade 10">Grade 10</option>
+              <option value="All FET Grades">All FET Grades</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Estimated Read / Study Time</label>
+            <input type="text" id="input-material-duration" placeholder="e.g. 20 min revision" class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Short Description *</label>
+          <textarea id="input-material-desc" required rows="2" placeholder="Brief overview of what this material covers for learners..." class="w-full p-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Study Content, Detailed Notes, or Text to Download *</label>
+          <textarea id="input-material-content" required rows="4" placeholder="Type or paste the complete study notes, worked example, or reference link here..." class="w-full p-2 border border-slate-200 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" id="btn-cancel-material" class="px-3.5 py-2 rounded-lg border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">Save Material</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MODAL 3: VIEW & DOWNLOAD STUDY MATERIAL -->
+  <div id="modal-view-material" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div id="print-area" class="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-xl overflow-hidden border border-slate-100">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-950 border border-amber-300" id="view-modal-category">Category</span>
+          <h3 class="font-bold text-slate-900 text-base sm:text-lg mt-1" id="view-modal-title">Material Title</h3>
+          <p class="text-xs text-slate-500" id="view-modal-meta">Grade &amp; Subject</p>
+        </div>
+        <button id="btn-close-view-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1 leading-none no-print">&times;</button>
+      </div>
+      
+      <div class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed custom-scroll flex-1">
+        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 font-medium" id="view-modal-desc">
+          Description
+        </div>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Study Document Content</div>
+          <div class="p-4 bg-slate-900 text-slate-100 rounded-xl font-mono text-xs sm:text-sm whitespace-pre-wrap leading-relaxed overflow-x-auto" id="view-modal-content">
+            Content body
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2 no-print">
+        <div class="flex items-center gap-2">
+          <!-- Download Button inside reader -->
+          <button id="btn-modal-download" class="px-3.5 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border border-amber-500/30 rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">
+            <span>⬇</span>
+            <span>Download Study File (.txt)</span>
+          </button>
+          <!-- Print / Save as PDF Button -->
+          <button id="btn-modal-print" class="px-3 py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold shadow-xs flex items-center gap-1.5 transition">
+            <span>🖨</span>
+            <span>Print / Save PDF</span>
+          </button>
+        </div>
+        <button id="btn-done-view-modal" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition">Close Reader</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-200 bg-white no-print">
+    The Tutorhive • Educational Hive for CAPS Curriculum Learners &amp; Educators 🐝
+  </footer>
+
+  <script>
+    // Initial Base Dataset
+    const defaultStudyData = {
+  "maths": {
+    id: "maths",
+    "name": "Mathematics",
+    "title": "Mathematics Hub",
+    "description": "Master core algebraic manipulation, trigonometric identities, and calculus fundamentals.",
+    "badgeClass": "bg-amber-100 text-amber-950 border border-amber-300",
+    "activeColor": "border-amber-500",
+    "concepts": [
+      {
+        id: "m1",
+        "topic": "Algebra",
+        "title": "Quadratic Formula & Roots",
+        "grade": "Grade 11",
+        "summary": "The quadratic formula provides the exact roots of any second-degree polynomial equation ax\u00b2 + bx + c = 0.",
+        "formula": "x = [-b \u00b1 \u221a(b\u00b2 - 4ac)] / (2a)",
+        "formulaNote": "Discriminant \u0394 = b\u00b2 - 4ac determines if roots are real, equal, or non-real.",
+        "tip": "If \u0394 > 0 and a perfect square, roots are rational. If \u0394 < 0, roots are non-real (imaginary).",
+        "question": "What is the nature of the roots if the discriminant \u0394 = -16?",
+        "options": [
+          {
+            "text": "Two equal real roots",
+            "correct": false
+          },
+          {
+            "text": "Two non-real (complex) roots",
+            "correct": true
+          },
+          {
+            "text": "Two unequal rational roots",
+            "correct": false
+          }
+        ],
+        "explanation": "Correct! A negative discriminant (\u0394 < 0) means the expression under the square root is negative, producing non-real roots."
+      },
+      {
+        id: "m2",
+        "topic": "Trigonometry",
+        "title": "Pythagorean & Quotient Identities",
+        "grade": "Grade 11",
+        "summary": "Fundamental trigonometric identities allow simplifying expressions and solving trig equations without recalculating sides.",
+        "formula": "sin\u00b2(\u03b8) + cos\u00b2(\u03b8) = 1  |  tan(\u03b8) = sin(\u03b8) / cos(\u03b8)",
+        "formulaNote": "Derived directly from the unit circle where x = cos(\u03b8) and y = sin(\u03b8).",
+        "tip": "Whenever you see 1 - sin\u00b2(\u03b8), immediately look to substitute cos\u00b2(\u03b8) to simplify fractions.",
+        "question": "Which expression is mathematically equivalent to 1 - cos\u00b2(x)?",
+        "options": [
+          {
+            "text": "sin\u00b2(x)",
+            "correct": true
+          },
+          {
+            "text": "tan\u00b2(x)",
+            "correct": false
+          },
+          {
+            "text": "-sin\u00b2(x)",
+            "correct": false
+          }
+        ],
+        "explanation": "Spot on! Rearranging sin\u00b2(x) + cos\u00b2(x) = 1 gives sin\u00b2(x) = 1 - cos\u00b2(x)."
+      },
+      {
+        id: "m3",
+        "topic": "Calculus",
+        "title": "Power Rule for Differentiation",
+        "grade": "Grade 12",
+        "summary": "The power rule is the primary method to find the instantaneous rate of change (derivative) of a polynomial term.",
+        "formula": "If f(x) = a\u00b7x\u207f, then f'(x) = n\u00b7a\u00b7x\u207f\u207b\u00b9",
+        "formulaNote": "Remember that the derivative of a constant term (c) is always 0.",
+        "tip": "Convert square roots and fractions into negative/fractional exponents before differentiating (e.g., 1/x\u00b2 = x\u207b\u00b2).",
+        "question": "What is the first derivative f'(x) of f(x) = 4x\u00b3 - 5?",
+        "options": [
+          {
+            "text": "12x\u00b2 - 5",
+            "correct": false
+          },
+          {
+            "text": "12x\u00b2",
+            "correct": true
+          },
+          {
+            "text": "7x\u00b2",
+            "correct": false
+          }
+        ],
+        "explanation": "Well done! Multiply the exponent by the coefficient (3 \u00d7 4 = 12), subtract 1 from the exponent (3 - 1 = 2), and the constant -5 drops to 0."
+      }
+    ],
+    "materials": [
+      {
+        id: "mat_m1",
+        "title": "Grade 12 Mathematics Official Formula Sheet (CAPS)",
+        "type": "Formula Sheet",
+        "grade": "Grade 12",
+        "duration": "10 min review",
+        "desc": "The official DBE exam formula sheet provided during Paper 1 and Paper 2 examinations.",
+        "content": "MATHEMATICS CAPS FORMULA REFERENCE:\n\n1. ALGEBRA & SEQUENCES:\n- Quadratic formula: x = [-b \u00b1 \u221a(b\u00b2 - 4ac)] / (2a)\n- Arithmetic: T_n = a + (n-1)d  |  S_n = (n/2)[2a + (n-1)d]\n- Geometric: T_n = a\u00b7r^(n-1)   |  S_n = a(r^n - 1)/(r - 1)  |  S_\u221e = a / (1 - r) for -1 < r < 1\n\n2. FINANCIAL MATHEMATICS:\n- Simple interest: A = P(1 + in)\n- Compound interest: A = P(1 + i)^n\n- Future Value Annuity: F = x[(1 + i)^n - 1] / i\n- Present Value Annuity: P = x[1 - (1 + i)^(-n)] / i\n\n3. CALCULUS:\n- Derivative from first principles: f'(x) = lim(h\u21920) [f(x+h) - f(x)] / h\n- Power rule: d/dx [x^n] = n\u00b7x^(n-1)"
+      },
+      {
+        id: "mat_m2",
+        "title": "Paper 1 & Paper 2 Exam Revision Guide & Question Breakdown",
+        "type": "Revision Notes",
+        "grade": "Grade 12",
+        "duration": "25 min study",
+        "desc": "Topic weighting breakdown and high-yield question patterns for National Senior Certificate exams.",
+        "content": "CAPS MATRIC EXAM BLUEPRINT:\n\n* PAPER 1 (150 Marks - 3 Hours):\n- Algebra, Equations & Inequalities (\u00b125 marks)\n- Patterns, Sequences & Series (\u00b125 marks)\n- Functions & Inverse Graphs (\u00b135 marks)\n- Financial Mathematics (\u00b115 marks)\n- Differential Calculus (\u00b135 marks)\n- Probability & Counting Principles (\u00b115 marks)\n\n* PAPER 2 (150 Marks - 3 Hours):\n- Statistics & Regression (\u00b120 marks)\n- Analytical Geometry (\u00b140 marks)\n- Trigonometry (Reductions, Identities, General Solutions) (\u00b140 marks)\n- Euclidean Geometry & Proportionality Theorems (\u00b150 marks)"
+      },
+      {
+        id: "mat_m3",
+        "title": "Functions & Inverse Graphs Worked Problem Set",
+        "type": "Worked Solutions",
+        "grade": "Grade 11",
+        "duration": "15 min practice",
+        "desc": "Step-by-step strategies for solving parabolas, hyperbolas, and exponential functions.",
+        "content": "WORKED EXAMPLE: Finding the Inverse of a Parabola\n\nProblem: Given f(x) = 2x\u00b2 for x \u2265 0. Find the equation of f\u207b\u00b9(x) and state its domain.\n\nStep 1: Swap x and y:\nx = 2y\u00b2\n\nStep 2: Solve for y:\ny\u00b2 = x / 2\ny = \u00b1\u221a(x / 2)\n\nStep 3: Apply the domain restriction (x \u2265 0 on original means y \u2265 0 on inverse):\ny = +\u221a(x / 2)\nTherefore, f\u207b\u00b9(x) = \u221a(x / 2), with domain x \u2265 0."
+      }
+    ]
+  },
+  "physics": {
+    id: "physics",
+    "name": "Physical Sciences",
+    "title": "Physical Sciences Hub",
+    "description": "Explore mechanics, chemical bonding, electrical circuits, and energy conservation.",
+    "badgeClass": "bg-amber-100 text-amber-950 border border-amber-300 font-bold",
+    "activeColor": "border-amber-500",
+    "concepts": [
+      {
+        id: "p1",
+        "topic": "Mechanics",
+        "title": "Newton's Second Law of Motion",
+        "grade": "Grade 11",
+        "summary": "When a non-zero net force acts on an object, the object accelerates in the direction of the force at a rate proportional to the force.",
+        "formula": "F_net = m \u00b7 a",
+        "formulaNote": "Force in Newtons (N), mass in kg, acceleration in m\u00b7s\u207b\u00b2.",
+        "tip": "Always draw a free-body diagram to sum all vector components before setting up F_net = ma.",
+        "question": "If a net force of 30 N acts on a 6 kg crate on a frictionless floor, what is its acceleration?",
+        "options": [
+          {
+            "text": "5 m\u00b7s\u207b\u00b2",
+            "correct": true
+          },
+          {
+            "text": "180 m\u00b7s\u207b\u00b2",
+            "correct": false
+          },
+          {
+            "text": "0.2 m\u00b7s\u207b\u00b2",
+            "correct": false
+          }
+        ],
+        "explanation": "Exactly right! a = F_net / m = 30 N / 6 kg = 5 m\u00b7s\u207b\u00b2."
+      },
+      {
+        id: "p2",
+        "topic": "Electricity",
+        "title": "Ohm's Law & Electric Power",
+        "grade": "Grade 10",
+        "summary": "The potential difference (voltage) across a conductor is directly proportional to current flowing through it at constant temperature.",
+        "formula": "V = I \u00b7 R  |  P = V \u00b7 I = I\u00b2 \u00b7 R",
+        "formulaNote": "V in Volts (V), I in Amperes (A), R in Ohms (\u03a9), Power in Watts (W).",
+        "tip": "In a series circuit, current I remains constant through all resistors; in parallel, voltage V is constant across branches.",
+        "question": "If a 12 V battery delivers 3 A of current through a bulb, what is the resistance of the bulb?",
+        "options": [
+          {
+            "text": "36 \u03a9",
+            "correct": false
+          },
+          {
+            "text": "4 \u03a9",
+            "correct": true
+          },
+          {
+            "text": "0.25 \u03a9",
+            "correct": false
+          }
+        ],
+        "explanation": "Great job! Using R = V / I gives 12 V / 3 A = 4 \u03a9."
+      },
+      {
+        id: "p3",
+        "topic": "Chemistry",
+        "title": "Organic Chemistry: Homologous Series",
+        "grade": "Grade 12",
+        "summary": "A homologous series is a series of organic compounds having the same functional group and general chemical formula.",
+        "formula": "Alkanes: C\u2099H\u2082\u2099\u208a\u2082  |  Alkenes: C\u2099H\u2082\u2099",
+        "formulaNote": "Each successive member differs by a -CH\u2082- unit.",
+        "tip": "Identify the longest carbon chain first to determine the root name (meth-, eth-, prop-, but-).",
+        "question": "What is the molecular formula for an alkane containing 4 carbon atoms (butane)?",
+        "options": [
+          {
+            "text": "C\u2084H\u2088",
+            "correct": false
+          },
+          {
+            "text": "C\u2084H\u2081\u2080",
+            "correct": true
+          },
+          {
+            "text": "C\u2084H\u2086",
+            "correct": false
+          }
+        ],
+        "explanation": "Correct! For alkanes: C\u2099H\u2082\u2099\u208a\u2082. With n = 4, 2(4) + 2 = 10, giving C\u2084H\u2081\u2080."
+      }
+    ],
+    "materials": [
+      {
+        id: "mat_p1",
+        "title": "Physical Sciences Data Booklet & Constants (CAPS)",
+        "type": "Formula Sheet",
+        "grade": "Grade 10",
+        "duration": "10 min reference",
+        "desc": "Universal physical constants, equations of motion, electrostatics, and standard reduction potentials.",
+        "content": "PHYSICAL CONSTANTS REFERENCE:\n- Acceleration due to gravity (g): 9.8 m\u00b7s\u207b\u00b2\n- Speed of light in vacuum (c): 3.0 \u00d7 10\u2078 m\u00b7s\u207b\u00b9\n- Planck constant (h): 6.63 \u00d7 10\u207b\u00b3\u2074 J\u00b7s\n- Coulomb constant (k): 9.0 \u00d7 10\u2079 N\u00b7m\u00b2\u00b7C\u207b\u00b2\n- Charge on electron (e): -1.6 \u00d7 10\u207b\u00b9\u2079 C\n\nMOTION EQUATIONS:\n1. v_f = v_i + a\u00b7\u0394t\n2. v_f\u00b2 = v_i\u00b2 + 2a\u00b7\u0394x\n3. \u0394x = v_i\u00b7\u0394t + 0.5\u00b7a\u00b7\u0394t\u00b2\n4. \u0394x = [(v_i + v_f) / 2] \u00b7 \u0394t"
+      },
+      {
+        id: "mat_p2",
+        "title": "Newton's Laws & Free-Body Diagrams Masterclass",
+        "type": "Revision Notes",
+        "grade": "Grade 11",
+        "duration": "20 min study",
+        "desc": "Systematic approach to resolving inclined planes, tensions, and friction forces.",
+        "content": "HOW TO SOLVE INCLINED PLANE PROBLEMS:\n\n1. Resolving Gravity Components on an Angle (\u03b8):\n- Parallel to slope (pulling down): F_g\u2225 = m\u00b7g\u00b7sin(\u03b8)\n- Perpendicular to slope (pressing into surface): F_g\u22a5 = m\u00b7g\u00b7cos(\u03b8)\n\n2. Normal Force (N):\n- On a flat surface: N = m\u00b7g\n- On an inclined slope (no vertical acceleration): N = m\u00b7g\u00b7cos(\u03b8)\n\n3. Maximum Static / Kinetic Friction:\n- f_k = \u03bc_k \u00b7 N = \u03bc_k \u00b7 m\u00b7g\u00b7cos(\u03b8)"
+      },
+      {
+        id: "mat_p3",
+        "title": "Organic Chemistry IUPAC Naming & Reaction Types",
+        "type": "Worked Solutions",
+        "grade": "Grade 12",
+        "duration": "15 min practice",
+        "desc": "Step-by-step naming rules for haloalkanes, alcohols, aldehydes, ketones, and esters.",
+        "content": "ESTERIFICATION SYNTHESIS WORKED SUMMARY:\n\nReactants: Carboxylic Acid + Alcohol (in presence of concentrated H\u2082SO\u2084 catalyst and heat).\n\nExample Reaction:\nEthanoic acid + Ethanol \u21cc Ethyl ethanoate + Water\nCH\u2083COOH + CH\u2083CH\u2082OH \u21cc CH\u2083COOCH\u2082CH\u2083 + H\u2082O\n\nNaming rule:\n- Alcohol portion forms the alkyl branch: \"ethyl\"\n- Carboxylic acid portion forms the main chain: \"ethanoate\"\n- Result: ethyl ethanoate (sweet fruity aroma)"
+      }
+    ]
+  },
+  "mathlit": {
+    id: "mathlit",
+    "name": "Mathematical Literacy",
+    "title": "Mathematical Literacy Hub",
+    "description": "Apply practical math to personal budgets, tiered utility tariffs, scale drawings, and data handling.",
+    "badgeClass": "bg-amber-100 text-amber-950 border border-amber-300 font-bold",
+    "activeColor": "border-amber-500",
+    "concepts": [
+      {
+        id: "l1",
+        "topic": "Finance",
+        "title": "Tiered Municipal Water & Electricity Tariffs",
+        "grade": "Grade 11",
+        "summary": "Municipal tariffs use stepped block rates where units within higher consumption brackets cost progressively more per unit.",
+        "formula": "Total Cost = \u03a3 (Units in Block \u00d7 Rate per Block) + Fixed Surcharge",
+        "formulaNote": "VAT (15% in SA) must usually be added to the final tariff sum if not already inclusive.",
+        "tip": "Never multiply total usage by the highest rate! Calculate the cost for each block separately up to the threshold.",
+        "question": "If Block 1 (0-6 kL) is R10/kL and Block 2 (7-15 kL) is R15/kL, what is the cost for using 8 kL?",
+        "options": [
+          {
+            "text": "R90 (6\u00d710 + 2\u00d715)",
+            "correct": true
+          },
+          {
+            "text": "R120 (8\u00d715)",
+            "correct": false
+          },
+          {
+            "text": "R80 (8\u00d710)",
+            "correct": false
+          }
+        ],
+        "explanation": "Spot on! The first 6 kL cost 6 \u00d7 R10 = R60. The remaining 2 kL fall in Block 2 at 2 \u00d7 R15 = R30. Total = R60 + R30 = R90."
+      },
+      {
+        id: "l2",
+        "topic": "Measurement",
+        "title": "Map Scales & Real-Life Distances",
+        "grade": "Grade 10",
+        "summary": "A representative fraction (ratio scale) compares map distance to actual real-world distance in identical units.",
+        "formula": "Real Distance = Map Measurement \u00d7 Scale Ratio",
+        "formulaNote": "1 km = 1,000 m = 100,000 cm.",
+        "tip": "Always convert centimeters to kilometers at the end: divide by 100,000.",
+        "question": "On a 1 : 50,000 map, a road measures 4 cm. What is the real-world distance in kilometers?",
+        "options": [
+          {
+            "text": "2 km",
+            "correct": true
+          },
+          {
+            "text": "20 km",
+            "correct": false
+          },
+          {
+            "text": "0.2 km",
+            "correct": false
+          }
+        ],
+        "explanation": "Correct! 4 cm \u00d7 50,000 = 200,000 cm. Dividing by 100,000 cm/km gives 2 km."
+      },
+      {
+        id: "l3",
+        "topic": "Taxation & VAT",
+        "title": "Value-Added Tax (VAT) Calculation",
+        "grade": "Grade 12",
+        "summary": "VAT is an indirect tax charged on the supply of goods and services in South Africa at a standard rate of 15%.",
+        "formula": "VAT Inclusive = Exclusive \u00d7 1.15  |  Exclusive = Inclusive \u00f7 1.15",
+        "formulaNote": "VAT Amount = Exclusive \u00d7 0.15, or Inclusive \u00d7 (15/115).",
+        "tip": "Never calculate 15% of the VAT-inclusive price to find the original price; divide by 1.15 instead.",
+        "question": "A study tablet costs R2,300 inclusive of 15% VAT. What is the price before VAT was added?",
+        "options": [
+          {
+            "text": "R1,955.00",
+            "correct": false
+          },
+          {
+            "text": "R2,000.00",
+            "correct": true
+          },
+          {
+            "text": "R2,645.00",
+            "correct": false
+          }
+        ],
+        "explanation": "Bingo! R2,300 \u00f7 1.15 = R2,000.00 (the VAT portion was R300)."
+      }
+    ],
+    "materials": [
+      {
+        id: "mat_l1",
+        "title": "South African Municipal Tariff Rates & Tax Tables (2024-2026)",
+        "type": "Formula Sheet",
+        "grade": "Grade 11",
+        "duration": "10 min review",
+        "desc": "Step-by-step reference sheet for reading stepped block tariffs, sewerage charges, and SARS income tax brackets.",
+        "content": "TAX BRACKET CALCULATIONS (SARS METHOD):\n\nHow to compute annual personal tax:\n1. Identify the taxable income bracket.\n2. Note the fixed base tax amount for that bracket.\n3. Calculate the portion of income above the bracket threshold.\n4. Multiply the excess by the marginal percentage rate.\n5. Sum the base tax + excess tax.\n6. Deduct primary rebate (R17,235) to find final tax payable."
+      },
+      {
+        id: "mat_l2",
+        "title": "Personal Budgeting, Pay Slips & Bank Statements Guide",
+        "type": "Revision Notes",
+        "grade": "Grade 10",
+        "duration": "20 min study",
+        "desc": "Practical breakdown of gross salary, statutory deductions (UIF 1%, PAYE, Pension), and net disposable income.",
+        "content": "PAY SLIP DECONSTRUCTION:\n\n- Gross Salary = Basic Wage + Overtime + Allowances\n- Statutory Deductions (Legal requirements):\n  * UIF = 1% of gross wage (capped at R177.12/month)\n  * PAYE = Pay As You Earn income tax\n- Voluntary Deductions: Medical aid contribution, pension/provident fund\n- Net Pay (Take-home) = Gross Salary - Total Deductions"
+      },
+      {
+        id: "mat_l3",
+        "title": "Packaging, Perimeter, Area & Volume Practical Toolkit",
+        "type": "Worked Solutions",
+        "grade": "Grade 12",
+        "duration": "15 min practice",
+        "desc": "Formula reference and real-world box packaging optimization problems.",
+        "content": "WORKED PACKAGING PROBLEM:\n\nHow many small soap boxes (Length: 10cm, Width: 5cm, Height: 4cm) can fit into a carton (Length: 50cm, Width: 30cm, Height: 20cm)?\n\nMethod:\n- Fit along length: 50 \u00f7 10 = 5 boxes\n- Fit along width: 30 \u00f7 5 = 6 boxes\n- Fit along height: 20 \u00f7 4 = 5 boxes\n\nTotal boxes = 5 \u00d7 6 \u00d7 5 = 150 small boxes fit comfortably."
+      }
+    ]
+  }
+};
+    const examQuestionBank = {
+  "maths": [
+    {
+      "q": "What is the discriminant \u0394 of the quadratic equation 2x\u00b2 - 4x + 2 = 0?",
+      "topic": "Algebra",
+      "options": [
+        {
+          "text": "\u0394 = 0 (Two equal real rational roots)",
+          "correct": true
+        },
+        {
+          "text": "\u0394 = 16 (Two unequal real roots)",
+          "correct": false
+        },
+        {
+          "text": "\u0394 = -16 (Two non-real roots)",
+          "correct": false
+        },
+        {
+          "text": "\u0394 = 32 (Two irrational roots)",
+          "correct": false
+        }
+      ],
+      "exp": "\u0394 = b\u00b2 - 4ac = (-4)\u00b2 - 4(2)(2) = 16 - 16 = 0."
+    },
+    {
+      "q": "Evaluate the trigonometric expression: sin(30\u00b0) + cos(60\u00b0).",
+      "topic": "Trigonometry",
+      "options": [
+        {
+          "text": "1.0",
+          "correct": true
+        },
+        {
+          "text": "0.5",
+          "correct": false
+        },
+        {
+          "text": "\u221a3 / 2",
+          "correct": false
+        },
+        {
+          "text": "2.0",
+          "correct": false
+        }
+      ],
+      "exp": "sin(30\u00b0) = 1/2 and cos(60\u00b0) = 1/2. Therefore, 1/2 + 1/2 = 1.0."
+    },
+    {
+      "q": "Find the derivative f'(x) of the polynomial function f(x) = 5x\u2074 - 3x\u00b2 + 7.",
+      "topic": "Calculus",
+      "options": [
+        {
+          "text": "20x\u00b3 - 6x",
+          "correct": true
+        },
+        {
+          "text": "20x\u00b3 - 6x + 7",
+          "correct": false
+        },
+        {
+          "text": "5x\u00b3 - 3x",
+          "correct": false
+        },
+        {
+          "text": "20x\u2074 - 6x\u00b2",
+          "correct": false
+        }
+      ],
+      "exp": "By power rule: d/dx(5x\u2074) = 20x\u00b3, d/dx(-3x\u00b2) = -6x, and constant 7 differentiates to 0."
+    },
+    {
+      "q": "What is the gradient of the line perpendicular to a line with gradient m = -2/3?",
+      "topic": "Analytical Geometry",
+      "options": [
+        {
+          "text": "3/2 (or 1.5)",
+          "correct": true
+        },
+        {
+          "text": "-3/2",
+          "correct": false
+        },
+        {
+          "text": "2/3",
+          "correct": false
+        },
+        {
+          "text": "-2/3",
+          "correct": false
+        }
+      ],
+      "exp": "Perpendicular lines satisfy m\u2081 \u00d7 m\u2082 = -1. If m\u2081 = -2/3, then m\u2082 = 3/2."
+    },
+    {
+      "q": "If the first term of an arithmetic sequence is a = 3 and common difference d = 4, what is the 10th term T\u2081\u2080?",
+      "topic": "Sequences & Series",
+      "options": [
+        {
+          "text": "39",
+          "correct": true
+        },
+        {
+          "text": "43",
+          "correct": false
+        },
+        {
+          "text": "40",
+          "correct": false
+        },
+        {
+          "text": "36",
+          "correct": false
+        }
+      ],
+      "exp": "T_n = a + (n-1)d. T\u2081\u2080 = 3 + (10 - 1)(4) = 3 + 36 = 39."
+    }
+  ],
+  "physics": [
+    {
+      "q": "A 5 kg trolley accelerates at 4 m\u00b7s\u207b\u00b2 on a horizontal frictionless track. What is the net force F_net?",
+      "topic": "Mechanics",
+      "options": [
+        {
+          "text": "20 N",
+          "correct": true
+        },
+        {
+          "text": "0.8 N",
+          "correct": false
+        },
+        {
+          "text": "9.8 N",
+          "correct": false
+        },
+        {
+          "text": "45 N",
+          "correct": false
+        }
+      ],
+      "exp": "F_net = m \u00b7 a = 5 kg \u00d7 4 m\u00b7s\u207b\u00b2 = 20 N."
+    },
+    {
+      "q": "What is the resistance R of a heating element operating at 230 V drawing 10 A of current?",
+      "topic": "Electricity",
+      "options": [
+        {
+          "text": "23 \u03a9",
+          "correct": true
+        },
+        {
+          "text": "2300 \u03a9",
+          "correct": false
+        },
+        {
+          "text": "0.043 \u03a9",
+          "correct": false
+        },
+        {
+          "text": "240 \u03a9",
+          "correct": false
+        }
+      ],
+      "exp": "R = V / I = 230 V / 10 A = 23 \u03a9."
+    },
+    {
+      "q": "Which homologous series is characterized by the presence of a carbon-to-carbon double bond (C=C)?",
+      "topic": "Organic Chemistry",
+      "options": [
+        {
+          "text": "Alkenes",
+          "correct": true
+        },
+        {
+          "text": "Alkanes",
+          "correct": false
+        },
+        {
+          "text": "Alcohols",
+          "correct": false
+        },
+        {
+          "text": "Esters",
+          "correct": false
+        }
+      ],
+      "exp": "Alkenes have general formula C\u2099H\u2082\u2099 and contain at least one carbon-carbon double bond."
+    },
+    {
+      "q": "What happens to the frequency observed by a stationary listener as a police siren approaches?",
+      "topic": "Doppler Effect",
+      "options": [
+        {
+          "text": "Observed frequency increases (higher pitch)",
+          "correct": true
+        },
+        {
+          "text": "Observed frequency decreases (lower pitch)",
+          "correct": false
+        },
+        {
+          "text": "Observed frequency remains strictly constant",
+          "correct": false
+        },
+        {
+          "text": "Wave speed drops to zero",
+          "correct": false
+        }
+      ],
+      "exp": "As the source moves toward the observer, wave crests are compressed, causing higher observed frequency."
+    },
+    {
+      "q": "What is the net work done on a car moving at constant velocity on a level highway?",
+      "topic": "Work, Energy & Power",
+      "options": [
+        {
+          "text": "0 Joules",
+          "correct": true
+        },
+        {
+          "text": "Equal to its kinetic energy",
+          "correct": false
+        },
+        {
+          "text": "Equal to its potential energy",
+          "correct": false
+        },
+        {
+          "text": "Infinite Joules",
+          "correct": false
+        }
+      ],
+      "exp": "Constant velocity means acceleration a = 0, so F_net = 0, and W_net = F_net \u00b7 \u0394x = 0 J."
+    }
+  ],
+  "mathlit": [
+    {
+      "q": "If municipal water Block 1 (0-6 kL) is charged at R10/kL and Block 2 (7-15 kL) at R16/kL, what is the cost for 7 kL?",
+      "topic": "Municipal Tariffs",
+      "options": [
+        {
+          "text": "R76 (6 \u00d7 R10 + 1 \u00d7 R16)",
+          "correct": true
+        },
+        {
+          "text": "R112 (7 \u00d7 R16)",
+          "correct": false
+        },
+        {
+          "text": "R70 (7 \u00d7 R10)",
+          "correct": false
+        },
+        {
+          "text": "R82 (6 \u00d7 R10 + 2 \u00d7 R11)",
+          "correct": false
+        }
+      ],
+      "exp": "First 6 kL = 6 \u00d7 R10 = R60. The 7th kL falls into Block 2 = 1 \u00d7 R16 = R16. Total = R60 + R16 = R76."
+    },
+    {
+      "q": "A scientific calculator sells for R345 including 15% VAT. What is the exclusive price before VAT?",
+      "topic": "Taxation & VAT",
+      "options": [
+        {
+          "text": "R300.00",
+          "correct": true
+        },
+        {
+          "text": "R293.25",
+          "correct": false
+        },
+        {
+          "text": "R396.75",
+          "correct": false
+        },
+        {
+          "text": "R330.00",
+          "correct": false
+        }
+      ],
+      "exp": "Price Excl. VAT = R345 \u00f7 1.15 = R300.00 (VAT amount is R45.00)."
+    },
+    {
+      "q": "On a scale map with ratio 1 : 25,000, two towns are 8 cm apart. What is the actual distance in kilometers?",
+      "topic": "Measurement & Maps",
+      "options": [
+        {
+          "text": "2.0 km",
+          "correct": true
+        },
+        {
+          "text": "20.0 km",
+          "correct": false
+        },
+        {
+          "text": "0.2 km",
+          "correct": false
+        },
+        {
+          "text": "200.0 km",
+          "correct": false
+        }
+      ],
+      "exp": "Actual distance = 8 cm \u00d7 25,000 = 200,000 cm. Convert to km: 200,000 \u00f7 100,000 = 2.0 km."
+    },
+    {
+      "q": "A worker earns a basic salary of R12,000. Statutory UIF is 1% of gross wage. What is the UIF deduction?",
+      "topic": "Finance & Pay Slips",
+      "options": [
+        {
+          "text": "R120.00",
+          "correct": true
+        },
+        {
+          "text": "R12.00",
+          "correct": false
+        },
+        {
+          "text": "R1,200.00",
+          "correct": false
+        },
+        {
+          "text": "R177.12",
+          "correct": false
+        }
+      ],
+      "exp": "1% of R12,000 = 0.01 \u00d7 R12,000 = R120.00 (below the monthly UIF cap)."
+    },
+    {
+      "q": "A rectangular garden has length 12 m and width 8 m. What length of fencing is needed to enclose it?",
+      "topic": "Perimeter & Area",
+      "options": [
+        {
+          "text": "40 m",
+          "correct": true
+        },
+        {
+          "text": "96 m",
+          "correct": false
+        },
+        {
+          "text": "20 m",
+          "correct": false
+        },
+        {
+          "text": "48 m",
+          "correct": false
+        }
+      ],
+      "exp": "Perimeter = 2(Length + Width) = 2(12 m + 8 m) = 2(20 m) = 40 m."
+    }
+  ]
+};
+
+    // Load State from LocalStorage if available
+    function loadStudyData() {
+      try {
+        const saved = localStorage.getItem('tutorhive_data_v1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.maths && parsed.physics && parsed.mathlit) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('LocalStorage unavailable or disabled:', e);
+      }
+      return defaultStudyData;
+    }
+
+    function saveStudyData() {
+      try {
+        localStorage.setItem('tutorhive_data_v1', JSON.stringify(studyData));
+      } catch (e) {
+        console.warn('Could not save to LocalStorage:', e);
+      }
+    }
+
+    const studyData = loadStudyData();
+
+    // App State
+    let currentRole = 'learner'; // 'learner' (Front-End) or 'educator' (Back-End Admin)
+    let currentSubject = 'maths';
+    let currentConceptIndex = 0;
+    let currentView = 'concepts'; // 'concepts', 'materials', 'solvers', or 'quiz'
+    let currentGradeFilter = 'all'; // 'all', 'Grade 10', 'Grade 11', 'Grade 12'
+    let activeViewingMaterial = null;
+    let adminPin = '216045'; // Educator administrator PIN
+    let score = 0;
+    const reviewedConcepts = new Set(['m1']);
+
+    // Timed Exam State (Step 6)
+    let currentQuizIndex = 0;
+    let quizUserAnswers = {}; // questionIndex -> selectedOptionIndex
+    let quizTimerInterval = null;
+    let quizSecondsRemaining = 300; // 5 minutes
+    let quizStartTime = null;
+
+    // DOM Elements - Navigation & Roles
+    const roleBadge = document.getElementById('role-badge');
+                const educatorNavActions = document.getElementById('educator-nav-actions');
+    const educatorBanner = document.getElementById('educator-banner');
+    const btnSwitchLearnerBanner = document.getElementById('btn-switch-learner-banner');
+    const learnerWelcomeBanner = document.getElementById('learner-welcome-banner');
+
+    // DOM Elements - Subjects & Tabs
+    const tabMaths = document.getElementById('tab-maths');
+    const tabPhysics = document.getElementById('tab-physics');
+    const tabMathlit = document.getElementById('tab-mathlit');
+    const subjectBadge = document.getElementById('subject-badge');
+    const subjectTitle = document.getElementById('subject-title');
+    const subjectDescription = document.getElementById('subject-description');
+    const viewConceptsBtn = document.getElementById('view-concepts-btn');
+    const viewMaterialsBtn = document.getElementById('view-materials-btn');
+    const viewSolversBtn = document.getElementById('view-solvers-btn');
+    const viewQuizBtn = document.getElementById('view-quiz-btn');
+    const materialsCountBadge = document.getElementById('materials-count-badge');
+    const sectionConcepts = document.getElementById('section-concepts');
+    const sectionMaterials = document.getElementById('section-materials');
+    const sectionSolvers = document.getElementById('section-solvers');
+    const sectionQuiz = document.getElementById('section-quiz');
+    const solverHeading = document.getElementById('solver-heading');
+    const solverSubheading = document.getElementById('solver-subheading');
+    const solverContainer = document.getElementById('solver-container');
+
+    // Grade Filter Elements
+    const gradeFilterPills = document.querySelectorAll('#grade-filter-pills .grade-pill');
+
+    // Concept Section Elements
+    const topicPillsContainer = document.getElementById('topic-pills');
+    const cardConceptTitle = document.getElementById('card-concept-title');
+    const cardGradeTag = document.getElementById('card-grade-tag');
+    const cardConceptSummary = document.getElementById('card-concept-summary');
+    const cardFormula = document.getElementById('card-formula');
+    const cardFormulaNote = document.getElementById('card-formula-note');
+    const cardTip = document.getElementById('card-tip');
+    const btnEditActiveConcept = document.getElementById('btn-edit-active-concept');
+    const btnDeleteActiveConcept = document.getElementById('btn-delete-active-concept');
+    const modalConceptHeading = document.getElementById('modal-concept-heading');
+    const modalConceptSubheading = document.getElementById('modal-concept-subheading');
+    const inputEditConceptId = document.getElementById('input-edit-concept-id');
+    const btnResetDefaults = document.getElementById('btn-reset-defaults');
+    const btnExportCurriculum = document.getElementById('btn-export-curriculum');
+    const btnImportCurriculum = document.getElementById('btn-import-curriculum');
+    const inputImportCurriculum = document.getElementById('input-import-curriculum');
+    const questionIndex = document.getElementById('question-index');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackBox = document.getElementById('feedback-box');
+    const btnNextConcept = document.getElementById('btn-next-concept');
+    const scoreCounter = document.getElementById('score-counter');
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('progress-bar');
+    const btnQuickAddConcept = document.getElementById('btn-quick-add-concept');
+
+    // Materials Section Elements
+    const materialsContainer = document.getElementById('materials-container');
+    const btnAddMaterialTrigger = document.getElementById('btn-add-material-trigger');
+
+    // Quiz Section Elements (Step 6)
+    const quizSubjectHeader = document.getElementById('quiz-subject-header');
+    const quizTimer = document.getElementById('quiz-timer');
+    const quizQuestionBox = document.getElementById('quiz-question-box');
+    const quizStepIndicator = document.getElementById('quiz-step-indicator');
+    const quizQuestionTopic = document.getElementById('quiz-question-topic');
+    const quizQuestionTitle = document.getElementById('quiz-question-title');
+    const quizOptionsContainer = document.getElementById('quiz-options-container');
+    const btnQuizPrev = document.getElementById('btn-quiz-prev');
+    const btnQuizNext = document.getElementById('btn-quiz-next');
+    const btnQuizSubmit = document.getElementById('btn-quiz-submit');
+    const quizReportCard = document.getElementById('quiz-report-card');
+    const reportScore = document.getElementById('report-score');
+    const reportLevel = document.getElementById('report-level');
+    const reportTimeTaken = document.getElementById('report-time-taken');
+    const reportFeedback = document.getElementById('report-feedback');
+    const reportBreakdownList = document.getElementById('report-breakdown-list');
+    const btnDownloadReport = document.getElementById('btn-download-report');
+    const btnRetakeQuiz = document.getElementById('btn-retake-quiz');
+
+    // Modal Elements - Admin Login
+    const modalAdminLogin = document.getElementById('modal-admin-login');
+    const formAdminLogin = document.getElementById('form-admin-login');
+    const inputAdminPin = document.getElementById('input-admin-pin');
+    const btnCloseLoginModal = document.getElementById('btn-close-login-modal');
+    const btnCancelLogin = document.getElementById('btn-cancel-login');
+
+    // Modal Elements - Concept
+    const modalAddConcept = document.getElementById('modal-add-concept');
+    const btnOpenAddConcept = document.getElementById('btn-open-add-concept');
+    const btnCloseConceptModal = document.getElementById('btn-close-concept-modal');
+    const btnCancelConcept = document.getElementById('btn-cancel-concept');
+    const formAddConcept = document.getElementById('form-add-concept');
+
+    // Modal Elements - Material
+    const modalAddMaterial = document.getElementById('modal-add-material');
+    const btnOpenAddMaterial = document.getElementById('btn-open-add-material');
+    const btnCloseMaterialModal = document.getElementById('btn-close-material-modal');
+    const btnCancelMaterial = document.getElementById('btn-cancel-material');
+    const formAddMaterial = document.getElementById('form-add-material');
+    const inputMaterialFile = document.getElementById('input-material-file');
+    const btnSelectFile = document.getElementById('btn-select-file');
+    const dropzoneArea = document.getElementById('dropzone-area');
+    const fileSelectedName = document.getElementById('file-selected-name');
+
+    // Modal Elements - View Material Reader
+    const modalViewMaterial = document.getElementById('modal-view-material');
+    const btnCloseViewModal = document.getElementById('btn-close-view-modal');
+    const btnDoneViewModal = document.getElementById('btn-done-view-modal');
+    const btnModalDownload = document.getElementById('btn-modal-download');
+    const btnModalPrint = document.getElementById('btn-modal-print');
+    const viewModalCategory = document.getElementById('view-modal-category');
+    const viewModalTitle = document.getElementById('view-modal-title');
+    const viewModalMeta = document.getElementById('view-modal-meta');
+    const viewModalDesc = document.getElementById('view-modal-desc');
+    const viewModalContent = document.getElementById('view-modal-content');
+
+    // Toast Element
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toast.classList.remove('-translate-y-12', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.add('-translate-y-12', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    // Role Switching (Educator vs Learner)
+    function setRole(role) {
+      currentRole = role;
+      if (role === 'educator') {
+        roleBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-slate-950 text-amber-300 border border-amber-400 font-bold';
+        roleBadge.textContent = 'Back-End (Admin Hive)';
+        educatorNavActions.classList.remove('hidden');
+        educatorBanner.classList.remove('hidden');
+        learnerWelcomeBanner.classList.add('hidden');
+        btnQuickAddConcept.classList.remove('hidden');
+        btnAddMaterialTrigger.classList.remove('hidden');
+        if (btnEditActiveConcept) btnEditActiveConcept.classList.remove('hidden');
+        if (btnDeleteActiveConcept) btnDeleteActiveConcept.classList.remove('hidden');
+        showToast('Back-End Admin Portal unlocked. You can now edit concepts and explanations.');
+      } else {
+        roleBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-100 text-amber-900 border border-amber-300';
+        roleBadge.textContent = 'Grade 10–12 FET';
+        educatorNavActions.classList.add('hidden');
+        educatorBanner.classList.add('hidden');
+        learnerWelcomeBanner.classList.remove('hidden');
+        btnQuickAddConcept.classList.add('hidden');
+        btnAddMaterialTrigger.classList.add('hidden');
+        if (btnEditActiveConcept) btnEditActiveConcept.classList.add('hidden');
+        if (btnDeleteActiveConcept) btnDeleteActiveConcept.classList.add('hidden');
+        showToast('Front-End Learner Mode active: Clean study & download view.');
+      }
+      renderMaterials();
+    }
+
+
+
+    btnSwitchLearnerBanner.addEventListener('click', () => setRole('learner'));
+
+    // Admin Login PIN Handlers
+    function closeLoginModal() {
+      modalAdminLogin.classList.add('hidden');
+      inputAdminPin.value = '';
+    }
+
+    btnCloseLoginModal.addEventListener('click', closeLoginModal);
+    btnCancelLogin.addEventListener('click', closeLoginModal);
+
+    formAdminLogin.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const entered = inputAdminPin.value.trim();
+      if (entered === adminPin || entered === '216045') {
+        closeLoginModal();
+        setRole('educator');
+      } else {
+        showToast('Incorrect PIN. Access restricted to educator back-end.');
+        inputAdminPin.classList.add('border-rose-500', 'ring-2', 'ring-rose-200');
+        setTimeout(() => {
+          inputAdminPin.classList.remove('border-rose-500', 'ring-2', 'ring-rose-200');
+        }, 1500);
+      }
+    });
+
+    // Grade Filter Selection (Step 6)
+    gradeFilterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        gradeFilterPills.forEach(p => {
+          p.className = 'grade-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        });
+        pill.className = 'grade-pill active px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white transition';
+        currentGradeFilter = pill.getAttribute('data-grade');
+        renderSubject();
+      });
+    });
+
+    
+    // Secret Hidden Gesture on Bee Logo (5 quick taps within 2.5 seconds or 2.5s long-press)
+    const beeLogo = document.getElementById('bee-logo-trigger');
+    let beeTapCount = 0;
+    let beeTapResetTimer = null;
+    let beePressTimer = null;
+
+    function triggerSecretAdminPrompt() {
+      if (currentRole === 'educator') {
+        showToast('🐝 Educator Console is currently active. Click "Switch back to Learner Mode" when done.');
+      } else {
+        modalAdminLogin.classList.remove('hidden');
+        inputAdminPin.value = '';
+        inputAdminPin.focus();
+        showToast('🐝 Secret Admin Hive unlocked! Enter your PIN.');
+      }
+    }
+
+    if (beeLogo) {
+      beeLogo.addEventListener('click', () => {
+        beeTapCount++;
+        clearTimeout(beeTapResetTimer);
+
+        // Visual bounce animation
+        beeLogo.classList.add('scale-90');
+        setTimeout(() => beeLogo.classList.remove('scale-90'), 150);
+
+        if (beeTapCount >= 5) {
+          beeTapCount = 0;
+          triggerSecretAdminPrompt();
+        } else {
+          // Reset tap count after 2.5 seconds of inactivity
+          beeTapResetTimer = setTimeout(() => {
+            beeTapCount = 0;
+          }, 2500);
+        }
+      });
+
+      // Long-press gesture for mobile touchscreens (press and hold 2.5s)
+      beeLogo.addEventListener('touchstart', (e) => {
+        beePressTimer = setTimeout(() => {
+          triggerSecretAdminPrompt();
+        }, 2500);
+      }, { passive: true });
+
+      beeLogo.addEventListener('touchend', () => {
+        clearTimeout(beePressTimer);
+      });
+      beeLogo.addEventListener('touchcancel', () => {
+        clearTimeout(beePressTimer);
+      });
+    }
+
+    // Tab Switching Logic
+    function setSubject(subjectKey) {
+      currentSubject = subjectKey;
+      currentConceptIndex = 0;
+
+      const tabs = [
+        { el: tabMaths, key: 'maths', activeBorder: 'border-amber-500', ring: 'ring-amber-200' },
+        { el: tabPhysics, key: 'physics', activeBorder: 'border-amber-500', ring: 'ring-amber-200' },
+        { el: tabMathlit, key: 'mathlit', activeBorder: 'border-amber-500', ring: 'ring-amber-200' }
+      ];
+
+      tabs.forEach(tab => {
+        if (tab.key === subjectKey) {
+          tab.el.className = `subject-tab active text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white ${tab.activeBorder} shadow-sm ring-2 ${tab.ring}`;
+        } else {
+          tab.el.className = 'subject-tab text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white border-slate-200 hover:border-slate-300';
+        }
+      });
+
+      renderSubject();
+      if (currentView === 'solvers') {
+        renderSolvers();
+      } else if (currentView === 'quiz') {
+        startQuiz();
+      }
+    }
+
+    tabMaths.addEventListener('click', () => setSubject('maths'));
+    tabPhysics.addEventListener('click', () => setSubject('physics'));
+    tabMathlit.addEventListener('click', () => setSubject('mathlit'));
+
+    // View Switching (Concepts vs Materials vs Solvers vs Quiz)
+    function switchView(viewName) {
+      currentView = viewName;
+      
+      sectionConcepts.classList.add('hidden');
+      sectionMaterials.classList.add('hidden');
+      sectionSolvers.classList.add('hidden');
+      sectionQuiz.classList.add('hidden');
+
+      viewConceptsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+      viewMaterialsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+      viewSolversBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+      viewQuizBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+
+      if (viewName === 'concepts') {
+        sectionConcepts.classList.remove('hidden');
+        viewConceptsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-950 text-amber-400 font-bold shadow-xs flex items-center gap-1.5';
+      } else if (viewName === 'materials') {
+        sectionMaterials.classList.remove('hidden');
+        viewMaterialsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-950 text-amber-400 font-bold shadow-xs flex items-center gap-1.5';
+        renderMaterials();
+      } else if (viewName === 'solvers') {
+        sectionSolvers.classList.remove('hidden');
+        viewSolversBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-950 text-amber-400 font-bold shadow-xs flex items-center gap-1.5';
+        renderSolvers();
+      } else if (viewName === 'quiz') {
+        sectionQuiz.classList.remove('hidden');
+        viewQuizBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition bg-slate-950 text-amber-400 font-bold shadow-xs flex items-center gap-1.5';
+        startQuiz();
+      }
+    }
+
+    viewConceptsBtn.addEventListener('click', () => switchView('concepts'));
+    viewMaterialsBtn.addEventListener('click', () => switchView('materials'));
+    viewSolversBtn.addEventListener('click', () => switchView('solvers'));
+    viewQuizBtn.addEventListener('click', () => switchView('quiz'));
+
+    // Filter concepts helper
+    function getFilteredConcepts() {
+      const sub = studyData[currentSubject];
+      const allList = sub.concepts || [];
+      if (currentGradeFilter === 'all') return allList;
+      return allList.filter(c => c.grade.includes(currentGradeFilter));
+    }
+
+    // Render Current Subject
+    function renderSubject() {
+      const sub = studyData[currentSubject];
+      subjectBadge.className = `inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold ${sub.badgeClass}`;
+      subjectBadge.textContent = sub.name;
+      subjectTitle.textContent = sub.title;
+      subjectDescription.textContent = sub.description;
+      materialsCountBadge.textContent = sub.materials ? sub.materials.length : 0;
+
+      const filtered = getFilteredConcepts();
+
+      // Render Topic Pills
+      topicPillsContainer.innerHTML = '';
+      if (filtered.length === 0) {
+        topicPillsContainer.innerHTML = `<span class="text-xs text-slate-400 italic">No topics found for ${currentGradeFilter}. Select "All Grades" or switch subject.</span>`;
+      } else {
+        if (currentConceptIndex >= filtered.length) currentConceptIndex = 0;
+        filtered.forEach((concept, idx) => {
+          const btn = document.createElement('button');
+          const isActive = idx === currentConceptIndex;
+          btn.className = isActive
+            ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition'
+            : 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+          btn.textContent = `${concept.topic}`;
+          btn.addEventListener('click', () => {
+            currentConceptIndex = idx;
+            renderConcept();
+            renderSubjectPills();
+          });
+          topicPillsContainer.appendChild(btn);
+        });
+      }
+
+      renderConcept();
+      renderMaterials();
+      updateProgress();
+    }
+
+    function renderSubjectPills() {
+      const filtered = getFilteredConcepts();
+      const buttons = topicPillsContainer.querySelectorAll('button');
+      buttons.forEach((btn, idx) => {
+        btn.className = idx === currentConceptIndex
+          ? 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-900 text-white transition'
+          : 'px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+      });
+    }
+
+    // Render Current Concept Details & Question
+    function renderConcept() {
+      const filtered = getFilteredConcepts();
+      if (filtered.length === 0) {
+        cardConceptTitle.textContent = "No Concepts in " + currentGradeFilter;
+        cardGradeTag.textContent = currentGradeFilter;
+        cardConceptSummary.textContent = "You currently have no concepts saved for this grade. In Educator Mode, click \"+ Add Concept\" above to add your own topics, formulas, and explanations.";
+        cardFormula.textContent = "—";
+        cardFormulaNote.textContent = "Your customized curriculum rules will appear here.";
+        cardTip.textContent = "Click \"+ Add Concept\" in Educator Mode to publish your own explanations.";
+        questionIndex.textContent = "Concept 0 of 0";
+        questionText.textContent = "No practice checks available yet.";
+        optionsContainer.innerHTML = '<div class="p-4 text-center text-xs text-slate-400 italic bg-slate-50 rounded-xl border border-dashed border-slate-200">Add a concept check in Educator Mode.</div>';
+        feedbackBox.className = 'hidden mt-3 p-3 rounded-lg text-xs leading-relaxed';
+        if (btnEditActiveConcept) btnEditActiveConcept.classList.add('hidden');
+        if (btnDeleteActiveConcept) btnDeleteActiveConcept.classList.add('hidden');
+        return;
+      }
+      if (currentRole === 'educator') {
+        if (btnEditActiveConcept) btnEditActiveConcept.classList.remove('hidden');
+        if (btnDeleteActiveConcept) btnDeleteActiveConcept.classList.remove('hidden');
+      }
+      if (currentConceptIndex >= filtered.length) currentConceptIndex = 0;
+
+      const concept = filtered[currentConceptIndex];
+
+      reviewedConcepts.add(concept.id);
+      updateProgress();
+
+      cardConceptTitle.textContent = concept.title;
+      cardGradeTag.textContent = concept.grade;
+      cardConceptSummary.textContent = concept.summary;
+      cardFormula.textContent = concept.formula || 'No formula required';
+      cardFormulaNote.textContent = concept.formulaNote || 'Fundamental concept rule';
+      cardTip.textContent = concept.tip || 'Practice related past exam questions regularly.';
+
+      // Question Section
+      questionIndex.textContent = `Concept ${currentConceptIndex + 1} of ${filtered.length}`;
+      questionText.textContent = concept.question || 'Concept verification question';
+
+      feedbackBox.className = 'hidden mt-3 p-3 rounded-lg text-xs leading-relaxed';
+      feedbackBox.innerHTML = '';
+
+      // Options
+      optionsContainer.innerHTML = '';
+      let answered = false;
+
+      (concept.options || []).forEach((opt) => {
+        const optBtn = document.createElement('button');
+        optBtn.className = 'w-full text-left p-3 rounded-lg border border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-white text-xs font-medium text-slate-800 transition flex items-center justify-between';
+        optBtn.innerHTML = `<span>${opt.text}</span><span class="text-slate-400 text-sm">○</span>`;
+
+        optBtn.addEventListener('click', () => {
+          if (answered) return;
+          answered = true;
+
+          const allButtons = optionsContainer.querySelectorAll('button');
+          allButtons.forEach(b => b.classList.add('pointer-events-none'));
+
+          if (opt.correct) {
+            optBtn.className = 'w-full text-left p-3 rounded-lg border-2 border-emerald-500 bg-emerald-50 text-xs font-medium text-emerald-900 transition flex items-center justify-between';
+            optBtn.innerHTML = `<span>${opt.text}</span><span class="text-emerald-600 font-bold">✓</span>`;
+            feedbackBox.className = 'mt-3 p-3 rounded-lg text-xs leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-200';
+            feedbackBox.innerHTML = `<strong>Correct!</strong> ${concept.explanation || 'Great job!'}`;
+            score += 10;
+            scoreCounter.textContent = score;
+          } else {
+            optBtn.className = 'w-full text-left p-3 rounded-lg border-2 border-rose-400 bg-rose-50 text-xs font-medium text-rose-900 transition flex items-center justify-between';
+            optBtn.innerHTML = `<span>${opt.text}</span><span class="text-rose-600 font-bold">✕</span>`;
+            feedbackBox.className = 'mt-3 p-3 rounded-lg text-xs leading-relaxed bg-rose-50 text-rose-800 border border-rose-200';
+            feedbackBox.innerHTML = `<strong>Not quite.</strong> ${concept.explanation || 'Review the summary and formula above.'}`;
+          }
+        });
+
+        optionsContainer.appendChild(optBtn);
+      });
+    }
+
+    // RENDER INTERACTIVE STEP-BY-STEP SOLVERS
+    function renderSolvers() {
+      if (currentSubject === 'maths') {
+        solverHeading.textContent = 'Mathematics: Quadratic Equation Solver (ax² + bx + c = 0)';
+        solverSubheading.textContent = 'Enter coefficients a, b, and c to compute the discriminant Δ, root nature, and exact step-by-step working.';
+        solverContainer.innerHTML = `
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Coefficient a (x²)</label>
+                <input type="number" id="math-input-a" value="1" step="any" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Coefficient b (x)</label>
+                <input type="number" id="math-input-b" value="-5" step="any" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Constant c</label>
+                <input type="number" id="math-input-c" value="6" step="any" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400">
+              </div>
+            </div>
+            
+            <button id="btn-calc-quadratic" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border border-amber-500/30 rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5">
+              <span>Calculate Roots &amp; Working Steps</span>
+            </button>
+
+            <div id="quadratic-output" class="p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs space-y-2 text-slate-800"></div>
+          </div>
+        `;
+
+        document.getElementById('btn-calc-quadratic').addEventListener('click', solveQuadratic);
+        solveQuadratic();
+
+      } else if (currentSubject === 'physics') {
+        solverHeading.textContent = "Physical Sciences: Newton's Second Law & Ohm's Law Solver";
+        solverSubheading.textContent = "Calculate force, mass, acceleration (F_net = m·a), or electrical resistance and power (V = I·R, P = V·I).";
+        solverContainer.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Newton's 2nd Law (F_net = m·a)</span>
+                <span class="text-xs text-emerald-600 font-bold">Mechanics</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Net Force F_net (Newtons, N)</label>
+                  <input type="number" id="phys-force" value="50" step="any" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Mass m (kg)</label>
+                  <input type="number" id="phys-mass" value="10" step="any" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+              </div>
+              <button id="btn-calc-physics" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition">
+                Compute Acceleration &amp; Free-Body Steps
+              </button>
+              <div id="physics-output" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 space-y-1.5"></div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Ohm's Law &amp; Circuit Power</span>
+                <span class="text-xs text-emerald-600 font-bold">Electricity</span>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Voltage V (Volts, V)</label>
+                  <input type="number" id="phys-volt" value="12" step="any" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Current I (Amperes, A)</label>
+                  <input type="number" id="phys-current" value="2.5" step="any" class="w-full p-2 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+              </div>
+              <button id="btn-calc-circuit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition">
+                Compute Resistance &amp; Power
+              </button>
+              <div id="circuit-output" class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-800 space-y-1.5"></div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('btn-calc-physics').addEventListener('click', solveNewton);
+        document.getElementById('btn-calc-circuit').addEventListener('click', solveCircuit);
+        solveNewton();
+        solveCircuit();
+
+      } else if (currentSubject === 'mathlit') {
+        solverHeading.textContent = 'Mathematical Literacy: Municipal Stepped Tariffs & 15% VAT Solver';
+        solverSubheading.textContent = 'Calculate water or electricity stepped consumption bills according to South African tiered municipal tariff brackets.';
+        solverContainer.innerHTML = `
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Monthly Water Usage (Kiloliters, kL)</label>
+                <input type="number" id="mathlit-usage" value="14" step="any" min="0" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <span class="text-[11px] text-slate-500 mt-1 block">Brackets: Block 1 (0-6 kL @ R10), Block 2 (7-15 kL @ R15.50), Block 3 (>15 kL @ R22)</span>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Fixed Municipal Network Levy (Rands)</label>
+                <input type="number" id="mathlit-fixed" value="45" step="any" class="w-full p-2.5 border border-slate-200 rounded-lg text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <span class="text-[11px] text-slate-500 mt-1 block">Standard fixed maintenance surcharge per connection</span>
+              </div>
+            </div>
+
+            <button id="btn-calc-tariff" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1.5">
+              <span>Calculate Itemized Municipal Bill &amp; 15% VAT</span>
+            </button>
+
+            <div id="tariff-output" class="p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs space-y-2 text-slate-800"></div>
+          </div>
+        `;
+
+        document.getElementById('btn-calc-tariff').addEventListener('click', solveTariff);
+        solveTariff();
+      }
+    }
+
+    function solveQuadratic() {
+      const a = parseFloat(document.getElementById('math-input-a').value) || 0;
+      const b = parseFloat(document.getElementById('math-input-b').value) || 0;
+      const c = parseFloat(document.getElementById('math-input-c').value) || 0;
+      const out = document.getElementById('quadratic-output');
+
+      if (a === 0) {
+        out.innerHTML = `<span class="text-rose-600 font-bold">Error: If a = 0, this is a linear equation (not quadratic).</span>`;
+        return;
+      }
+
+      const delta = (b * b) - (4 * a * c);
+      let nature = '';
+      let rootsHtml = '';
+
+      if (delta > 0) {
+        const r1 = ((-b + Math.sqrt(delta)) / (2 * a)).toFixed(2);
+        const r2 = ((-b - Math.sqrt(delta)) / (2 * a)).toFixed(2);
+        nature = 'Δ > 0: Two unequal, real roots.';
+        rootsHtml = `x₁ = <strong>${r1}</strong>,  x₂ = <strong>${r2}</strong>`;
+      } else if (delta === 0) {
+        const r = (-b / (2 * a)).toFixed(2);
+        nature = 'Δ = 0: Two equal, real rational roots.';
+        rootsHtml = `x₁ = x₂ = <strong>${r}</strong>`;
+      } else {
+        const realPart = (-b / (2 * a)).toFixed(2);
+        const imagPart = (Math.sqrt(-delta) / (2 * a)).toFixed(2);
+        nature = 'Δ < 0: Two complex (non-real) roots.';
+        rootsHtml = `x = <strong>${realPart} ± ${imagPart}i</strong>`;
+      }
+
+      out.innerHTML = `
+        <div class="text-slate-900 font-bold pb-1 border-b border-slate-200">WORKED ALGEBRAIC STEPS:</div>
+        <div>1. Given Equation: ${a}x² ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)}x ${c >= 0 ? '+ ' + c : '- ' + Math.abs(c)} = 0</div>
+        <div>2. Formula: x = [-b ± √(b² - 4ac)] / (2a)</div>
+        <div>3. Substitute: x = [-(${b}) ± √((${b})² - 4(${~~a})(${c}))] / (2 × ${a})</div>
+        <div>4. Discriminant Δ: (${b})² - 4(${~~a})(${c}) = ${b * b} - ${4 * a * c} = <strong>${delta}</strong></div>
+        <div class="text-amber-800 font-bold">5. Nature of Roots: ${nature}</div>
+        <div class="mt-2 pt-2 border-t border-slate-200 text-sm font-bold text-slate-900">Final Solution: ${rootsHtml}</div>
+      `;
+    }
+
+    function solveNewton() {
+      const F = parseFloat(document.getElementById('phys-force').value) || 0;
+      const m = parseFloat(document.getElementById('phys-mass').value) || 0;
+      const out = document.getElementById('physics-output');
+
+      if (m <= 0) {
+        out.innerHTML = `<span class="text-rose-600 font-bold">Error: Mass must be greater than 0 kg.</span>`;
+        return;
+      }
+
+      const a = (F / m).toFixed(2);
+      out.innerHTML = `
+        <div class="font-bold text-slate-900">Formula: F_net = m · a</div>
+        <div>1. Rearrange for acceleration: a = F_net / m</div>
+        <div>2. Substitute values: a = ${F} N / ${m} kg</div>
+        <div class="text-emerald-800 font-bold mt-1 text-sm">Result: a = ${a} m·s⁻²</div>
+      `;
+    }
+
+    function solveCircuit() {
+      const V = parseFloat(document.getElementById('phys-volt').value) || 0;
+      const I = parseFloat(document.getElementById('phys-current').value) || 0;
+      const out = document.getElementById('circuit-output');
+
+      if (I <= 0) {
+        out.innerHTML = `<span class="text-rose-600 font-bold">Error: Current must be greater than 0 A.</span>`;
+        return;
+      }
+
+      const R = (V / I).toFixed(2);
+      const P = (V * I).toFixed(2);
+      out.innerHTML = `
+        <div class="font-bold text-slate-900">Formulas: V = I·R  |  P = V·I</div>
+        <div>1. Resistance: R = V / I = ${V} V / ${I} A = <strong>${R} Ω</strong></div>
+        <div>2. Power: P = V · I = ${V} V × ${I} A = <strong>${P} W</strong></div>
+      `;
+    }
+
+    function solveTariff() {
+      const kL = parseFloat(document.getElementById('mathlit-usage').value) || 0;
+      const fixed = parseFloat(document.getElementById('mathlit-fixed').value) || 0;
+      const out = document.getElementById('tariff-output');
+
+      let b1Units = Math.min(6, kL);
+      let b1Cost = b1Units * 10.0;
+
+      let b2Units = Math.max(0, Math.min(9, kL - 6));
+      let b2Cost = b2Units * 15.50;
+
+      let b3Units = Math.max(0, kL - 15);
+      let b3Cost = b3Units * 22.00;
+
+      let waterSubtotal = b1Cost + b2Cost + b3Cost;
+      let totalExVat = waterSubtotal + fixed;
+      let vat = totalExVat * 0.15;
+      let totalIncVat = totalExVat + vat;
+
+      out.innerHTML = `
+        <div class="font-bold text-slate-900 pb-1 border-b border-slate-200">ITEMIZED MUNICIPAL UTILITY CALCULATION:</div>
+        <div>• Block 1 (0 to 6 kL): ${b1Units} kL × R10.00 = R${b1Cost.toFixed(2)}</div>
+        <div>• Block 2 (7 to 15 kL): ${b2Units} kL × R15.50 = R${b2Cost.toFixed(2)}</div>
+        <div>• Block 3 (>15 kL): ${b3Units} kL × R22.00 = R${b3Cost.toFixed(2)}</div>
+        <div>• Fixed Network Charge: R${fixed.toFixed(2)}</div>
+        <div class="pt-1 border-t border-slate-200">Subtotal (Excl. VAT): <strong>R${totalExVat.toFixed(2)}</strong></div>
+        <div class="text-amber-700">• 15% South African VAT: R${vat.toFixed(2)}</div>
+        <div class="text-sm font-bold text-slate-900 mt-1">Total Payable (Incl. 15% VAT): R${totalIncVat.toFixed(2)}</div>
+      `;
+    }
+
+    // STEP 6: TIMED PRACTICE EXAM ENGINE
+    function startQuiz() {
+      currentQuizIndex = 0;
+      quizUserAnswers = {};
+      quizSecondsRemaining = 300; // 5 min
+      quizStartTime = new Date();
+
+      clearInterval(quizTimerInterval);
+      updateQuizTimerDisplay();
+      quizTimerInterval = setInterval(() => {
+        quizSecondsRemaining--;
+        updateQuizTimerDisplay();
+        if (quizSecondsRemaining <= 0) {
+          clearInterval(quizTimerInterval);
+          submitQuiz();
+          showToast('Time expired! Exam automatically submitted.');
+        }
+      }, 1000);
+
+      quizQuestionBox.classList.remove('hidden');
+      quizReportCard.classList.add('hidden');
+      quizSubjectHeader.textContent = `${studyData[currentSubject].name} Practice Exam`;
+
+      renderQuizQuestion();
+    }
+
+    function updateQuizTimerDisplay() {
+      const m = Math.floor(quizSecondsRemaining / 60);
+      const s = quizSecondsRemaining % 60;
+      quizTimer.textContent = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function renderQuizQuestion() {
+      const questions = examQuestionBank[currentSubject] || [];
+      if (questions.length === 0) return;
+
+      const q = questions[currentQuizIndex];
+      quizStepIndicator.textContent = `Question ${currentQuizIndex + 1} of ${questions.length}`;
+      quizQuestionTopic.textContent = q.topic;
+      quizQuestionTitle.textContent = q.q;
+
+      btnQuizPrev.disabled = currentQuizIndex === 0;
+
+      if (currentQuizIndex === questions.length - 1) {
+        btnQuizNext.classList.add('hidden');
+        btnQuizSubmit.classList.remove('hidden');
+      } else {
+        btnQuizNext.classList.remove('hidden');
+        btnQuizSubmit.classList.add('hidden');
+      }
+
+      quizOptionsContainer.innerHTML = '';
+      q.options.forEach((opt, optIdx) => {
+        const isSelected = quizUserAnswers[currentQuizIndex] === optIdx;
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-3.5 rounded-xl border transition flex items-center justify-between text-xs font-medium ${
+          isSelected 
+            ? 'border-amber-500 bg-amber-50 text-slate-950 font-bold ring-2 ring-amber-300' 
+            : 'border-slate-200 hover:border-slate-300 bg-slate-50/50 hover:bg-white text-slate-800'
+        }`;
+        btn.innerHTML = `
+          <span>${opt.text}</span>
+          <span class="w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-amber-500 bg-amber-400 text-slate-950 font-bold' : 'border-slate-300'} text-[10px]">
+            ${isSelected ? '✓' : ''}
+          </span>
+        `;
+        btn.addEventListener('click', () => {
+          quizUserAnswers[currentQuizIndex] = optIdx;
+          renderQuizQuestion();
+        });
+        quizOptionsContainer.appendChild(btn);
+      });
+    }
+
+    btnQuizPrev.addEventListener('click', () => {
+      if (currentQuizIndex > 0) {
+        currentQuizIndex--;
+        renderQuizQuestion();
+      }
+    });
+
+    btnQuizNext.addEventListener('click', () => {
+      const questions = examQuestionBank[currentSubject] || [];
+      if (currentQuizIndex < questions.length - 1) {
+        currentQuizIndex++;
+        renderQuizQuestion();
+      }
+    });
+
+    btnQuizSubmit.addEventListener('click', submitQuiz);
+
+    function submitQuiz() {
+      clearInterval(quizTimerInterval);
+      const questions = examQuestionBank[currentSubject] || [];
+      let correctCount = 0;
+
+      reportBreakdownList.innerHTML = '';
+
+      questions.forEach((q, idx) => {
+        const userChoice = quizUserAnswers[idx];
+        const isCorrect = userChoice !== undefined && q.options[userChoice] && q.options[userChoice].correct;
+        if (isCorrect) correctCount++;
+
+        const reviewCard = document.createElement('div');
+        reviewCard.className = `p-3.5 rounded-xl border text-xs ${isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
+        
+        let chosenText = userChoice !== undefined ? q.options[userChoice].text : 'Unanswered';
+        let correctText = q.options.find(o => o.correct).text;
+
+        reviewCard.innerHTML = `
+          <div class="flex items-center justify-between font-bold mb-1">
+            <span class="${isCorrect ? 'text-emerald-800' : 'text-rose-800'}">Q${idx + 1}: ${q.topic} • ${isCorrect ? 'Correct (+1)' : 'Incorrect (0)'}</span>
+            <span>${isCorrect ? '✓' : '✕'}</span>
+          </div>
+          <div class="text-slate-800 font-medium mb-1.5">${q.q}</div>
+          <div class="text-[11px] text-slate-600">Your Answer: <span class="font-semibold">${chosenText}</span></div>
+          ${!isCorrect ? `<div class="text-[11px] text-emerald-800 font-semibold">Correct Answer: ${correctText}</div>` : ''}
+          <div class="mt-1 text-[11px] text-slate-500 italic">Explanation: ${q.exp}</div>
+        `;
+        reportBreakdownList.appendChild(reviewCard);
+      });
+
+      const total = questions.length;
+      const pct = Math.round((correctCount / total) * 100);
+      reportScore.textContent = `${correctCount} / ${total} (${pct}%)`;
+
+      // South African CAPS Achievement Rating Scales
+      let levelText = '';
+      let feedback = '';
+      if (pct >= 80) {
+        levelText = 'Level 7: Outstanding (80–100%)';
+        feedback = 'Outstanding performance! You demonstrate exceptional mastery of key conceptual definitions, formulas, and analytical questions.';
+      } else if (pct >= 70) {
+        levelText = 'Level 6: Meritorious (70–79%)';
+        feedback = 'Meritorious achievement. Great conceptual understanding with high accuracy across standard exam question patterns.';
+      } else if (pct >= 60) {
+        levelText = 'Level 5: Substantial (60–69%)';
+        feedback = 'Substantial achievement. Solid core understanding; review the explanations for any missed steps to reach an A/Level 7 standard.';
+      } else if (pct >= 50) {
+        levelText = 'Level 4: Adequate (50–59%)';
+        feedback = 'Adequate achievement. You passed the baseline; focus revision on your weaker topics by downloading the study guides.';
+      } else if (pct >= 40) {
+        levelText = 'Level 3: Moderate (40–49%)';
+        feedback = 'Moderate achievement. More structured practice required. Use our step-by-step solvers and revision notes to practice regular calculations.';
+      } else {
+        levelText = 'Level 1-2: Needs Focus (<40%)';
+        feedback = 'Needs improvement. Read through the diagnostic review below and download the official formula sheets to strengthen your foundation.';
+      }
+
+      reportLevel.textContent = levelText;
+      reportFeedback.textContent = feedback;
+
+      // Time taken
+      const elapsed = Math.max(0, 300 - quizSecondsRemaining);
+      const em = Math.floor(elapsed / 60);
+      const es = elapsed % 60;
+      reportTimeTaken.textContent = `${em < 10 ? '0' : ''}${em}:${es < 10 ? '0' : ''}${es}`;
+
+      quizQuestionBox.classList.add('hidden');
+      quizReportCard.classList.remove('hidden');
+      showToast(`Exam completed! You achieved ${levelText}`);
+    }
+
+    // Download Report Card
+    btnDownloadReport.addEventListener('click', () => {
+      const subName = studyData[currentSubject].name;
+      const questions = examQuestionBank[currentSubject] || [];
+      const divider = '='.repeat(60);
+      const subDivider = '-'.repeat(60);
+
+      let text = 
+`${divider}
+THE TUTORHIVE • OFFICIAL PRACTICE EXAM PERFORMANCE REPORT 🐝
+Subject: ${subName.toUpperCase()}
+Date: ${new Date().toLocaleDateString()} | Grade Phase: CAPS Senior Phase (FET)
+${divider}
+
+RESULT OVERVIEW:
+Score: ${reportScore.textContent}
+Achievement Rating: ${reportLevel.textContent}
+Duration: ${reportTimeTaken.textContent}
+
+EDUCATOR FEEDBACK & DIAGNOSTIC:
+${reportFeedback.textContent}
+
+${subDivider}
+DIAGNOSTIC QUESTION BREAKDOWN:
+${subDivider}
+`;
+
+      questions.forEach((q, idx) => {
+        const userChoice = quizUserAnswers[idx];
+        const isCorrect = userChoice !== undefined && q.options[userChoice] && q.options[userChoice].correct;
+        let chosenText = userChoice !== undefined ? q.options[userChoice].text : 'Unanswered';
+        let correctText = q.options.find(o => o.correct).text;
+
+        text += `
+[Q${idx + 1}] Topic: ${q.topic}
+Question: ${q.q}
+Your Answer: ${chosenText} (${isCorrect ? 'CORRECT' : 'INCORRECT'})
+Correct Answer: ${correctText}
+Explanation: ${q.exp}
+`;
+      });
+
+      text += `
+${divider}
+Generated via The Tutorhive Learning Portal for South African CAPS Curriculum Learners 🐝
+`;
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${subName}_Exam_ReportCard.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Downloaded official exam report card!');
+    });
+
+    btnRetakeQuiz.addEventListener('click', startQuiz);
+
+    // Download Function for Learners (Front-End)
+    function triggerDownload(mat, subjectName) {
+      const divider = '='.repeat(60);
+      const subDivider = '-'.repeat(60);
+      const textToSave = 
+`${divider}
+THE TUTORHIVE • ${subjectName.toUpperCase()} HIVE 🐝
+Title: ${mat.title}
+Category: ${mat.type} | Target: ${mat.grade} | Read Time: ${mat.duration || 'Self-paced'}
+${divider}
+
+OVERVIEW & OBJECTIVES:
+${mat.desc}
+
+${subDivider}
+STUDY NOTES & CONTENT:
+${subDivider}
+
+${mat.content}
+
+${divider}
+Prepared for South African CAPS Curriculum Learners (Mathematics, Physical Sciences & Mathematical Literacy)
+Distributed via The Tutorhive Educational Companion 🐝
+`;
+
+      const blob = new Blob([textToSave], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safeTitle = mat.title.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 40);
+      a.download = `${safeTitle}_TheTutorhive.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Downloaded: "${mat.title}"`);
+    }
+
+    // Render Study Materials with Grade Filter
+    function renderMaterials() {
+      const sub = studyData[currentSubject];
+      materialsContainer.innerHTML = '';
+      let list = sub.materials || [];
+      
+      if (currentGradeFilter !== 'all') {
+        list = list.filter(m => m.grade.includes(currentGradeFilter));
+      }
+
+      materialsCountBadge.textContent = list.length;
+
+      if (list.length === 0) {
+        materialsContainer.innerHTML = `
+          <div class="col-span-full p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+            <span class="text-3xl">📂</span>
+            <div class="font-bold text-slate-800 text-sm mt-2">No study materials found for ${currentGradeFilter}.</div>
+            <p class="text-xs text-slate-500 mt-1">${currentRole === 'educator' ? 'Click "Upload / Add New Study Material" to publish files for this grade!' : 'Select "All Grades" or check back once your educator publishes files.'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach((mat, idx) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 rounded-xl p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition relative group';
+
+        let categoryColor = 'bg-amber-100 text-amber-950 border-amber-300 font-bold';
+        if (mat.type === 'Past Exam Paper') categoryColor = 'bg-rose-50 text-rose-700 border-rose-100';
+        if (mat.type === 'Formula Sheet') categoryColor = 'bg-amber-50 text-amber-700 border-amber-100';
+        if (mat.type === 'Worked Solutions') categoryColor = 'bg-emerald-50 text-emerald-700 border-emerald-100';
+
+        const deleteBtnHtml = currentRole === 'educator' 
+          ? `<button class="btn-delete-mat text-rose-500 hover:text-rose-700 text-xs font-bold transition px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200" title="Delete Material from Portal">&times; Delete</button>`
+          : '';
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${categoryColor}">${mat.type}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-slate-500 font-medium">${mat.grade}</span>
+                ${deleteBtnHtml}
+              </div>
+            </div>
+            <h4 class="font-bold text-slate-900 text-sm leading-snug">${mat.title}</h4>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed line-clamp-3">${mat.desc}</p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <span class="text-[11px] text-slate-500 font-medium">⏱ ${mat.duration || 'Study guide'}</span>
+            
+            <div class="flex items-center gap-1.5">
+              <button class="btn-download-direct px-2.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold border border-amber-500/30 rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs transition" title="Download directly to your device">
+                <span>⬇</span>
+                <span>Download</span>
+              </button>
+              <button class="btn-read-material px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                <span>Read</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.btn-download-direct').addEventListener('click', (e) => {
+          e.stopPropagation();
+          triggerDownload(mat, sub.name);
+        });
+
+        card.querySelector('.btn-read-material').addEventListener('click', () => {
+          openViewMaterialModal(mat, sub.name);
+        });
+
+        if (currentRole === 'educator') {
+          const delBtn = card.querySelector('.btn-delete-mat');
+          if (delBtn) {
+            delBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              sub.materials.splice(idx, 1);
+              saveStudyData();
+              showToast(`Removed "${mat.title}" from portal.`);
+              renderMaterials();
+            });
+          }
+        }
+
+        materialsContainer.appendChild(card);
+      });
+    }
+
+    function openViewMaterialModal(mat, subjectName) {
+      activeViewingMaterial = { mat, subjectName };
+      viewModalCategory.textContent = mat.type;
+      viewModalTitle.textContent = mat.title;
+      viewModalMeta.textContent = `${subjectName} • ${mat.grade} • ${mat.duration || 'Self-paced'}`;
+      viewModalDesc.textContent = mat.desc;
+      viewModalContent.textContent = mat.content;
+      modalViewMaterial.classList.remove('hidden');
+    }
+
+    function closeViewMaterialModal() {
+      modalViewMaterial.classList.add('hidden');
+      activeViewingMaterial = null;
+    }
+
+    btnCloseViewModal.addEventListener('click', closeViewMaterialModal);
+    btnDoneViewModal.addEventListener('click', closeViewMaterialModal);
+
+    btnModalDownload.addEventListener('click', () => {
+      if (activeViewingMaterial) {
+        triggerDownload(activeViewingMaterial.mat, activeViewingMaterial.subjectName);
+      }
+    });
+
+    btnModalPrint.addEventListener('click', () => {
+      window.print();
+    });
+
+    // Next Concept
+    btnNextConcept.addEventListener('click', () => {
+      const filtered = getFilteredConcepts();
+      if (filtered.length === 0) return;
+      currentConceptIndex = (currentConceptIndex + 1) % filtered.length;
+      renderSubjectPills();
+      renderConcept();
+    });
+
+    // Update Progress
+    function updateProgress() {
+      let totalConcepts = 0;
+      ['maths', 'physics', 'mathlit'].forEach(k => {
+        totalConcepts += (studyData[k].concepts || []).length;
+      });
+      const count = reviewedConcepts.size;
+      progressText.textContent = `${count} of ${totalConcepts} concepts explored`;
+      const pct = Math.min(100, Math.round((count / (totalConcepts || 1)) * 100));
+      progressBar.style.width = `${pct}%`;
+    }
+
+    // Modal Control: Add Concept (Back-End)
+    function openAddConceptModal() {
+      inputEditConceptId.value = '';
+      formAddConcept.reset();
+      document.getElementById('input-concept-subject').value = currentSubject;
+      modalConceptHeading.textContent = 'Add New Learning Concept (Back-End)';
+      modalConceptSubheading.textContent = 'Create a study concept, formula, and practice check.';
+      modalAddConcept.classList.remove('hidden');
+    }
+
+    function openEditActiveConceptModal() {
+      const filtered = getFilteredConcepts();
+      if (filtered.length === 0) return;
+      const concept = filtered[currentConceptIndex];
+      if (!concept) return;
+
+      inputEditConceptId.value = concept.id;
+      document.getElementById('input-concept-subject').value = currentSubject;
+      document.getElementById('input-concept-grade').value = concept.grade;
+      document.getElementById('input-concept-topic').value = concept.topic;
+      document.getElementById('input-concept-title').value = concept.title;
+      document.getElementById('input-concept-summary').value = concept.summary;
+      document.getElementById('input-concept-formula').value = concept.formula || '';
+      document.getElementById('input-concept-formulanote').value = concept.formulaNote || '';
+      document.getElementById('input-concept-tip').value = concept.tip || '';
+      document.getElementById('input-concept-qprompt').value = concept.question || '';
+
+      const opts = concept.options || [];
+      document.getElementById('input-concept-opt0').value = opts[0] ? opts[0].text : '';
+      document.getElementById('input-concept-opt1').value = opts[1] ? opts[1].text : '';
+      document.getElementById('input-concept-opt2').value = opts[2] ? opts[2].text : '';
+
+      const correctIndex = opts.findIndex(o => o.correct);
+      const radio = document.querySelector(`input[name="correct_opt"][value="${correctIndex >= 0 ? correctIndex : 0}"]`);
+      if (radio) radio.checked = true;
+
+      document.getElementById('input-concept-qexplanation').value = concept.explanation || '';
+      modalConceptHeading.textContent = 'Edit Concept & Explanations (Back-End)';
+      modalConceptSubheading.textContent = 'Customize curriculum definitions, formulas, or question explanations.';
+      modalAddConcept.classList.remove('hidden');
+    }
+
+    function closeAddConceptModal() {
+      modalAddConcept.classList.add('hidden');
+      formAddConcept.reset();
+      inputEditConceptId.value = '';
+    }
+
+    btnOpenAddConcept.addEventListener('click', openAddConceptModal);
+    btnQuickAddConcept.addEventListener('click', openAddConceptModal);
+    if (btnEditActiveConcept) btnEditActiveConcept.addEventListener('click', openEditActiveConceptModal);
+    
+    if (btnDeleteActiveConcept) {
+      btnDeleteActiveConcept.addEventListener('click', () => {
+        const filtered = getFilteredConcepts();
+        if (filtered.length === 0) return;
+        const concept = filtered[currentConceptIndex];
+        if (!concept) return;
+
+        const subList = studyData[currentSubject].concepts || [];
+        const realIdx = subList.findIndex(c => c.id === concept.id);
+        if (realIdx >= 0) {
+          subList.splice(realIdx, 1);
+          saveStudyData();
+          showToast(`Deleted concept "${concept.title}".`);
+          if (currentConceptIndex > 0) currentConceptIndex--;
+          renderSubject();
+        }
+      });
+    }
+
+    // Export Curriculum to JSON Backup File
+    if (btnExportCurriculum) {
+      btnExportCurriculum.addEventListener('click', () => {
+        const jsonStr = JSON.stringify(studyData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `The_Tutorhive_Curriculum_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Curriculum backup file downloaded safely!');
+      });
+    }
+
+    // Import Curriculum from JSON Backup File
+    if (btnImportCurriculum && inputImportCurriculum) {
+      btnImportCurriculum.addEventListener('click', () => {
+        inputImportCurriculum.click();
+      });
+
+      inputImportCurriculum.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const imported = JSON.parse(evt.target.result);
+            if (imported && imported.maths && imported.physics && imported.mathlit) {
+              Object.assign(studyData, imported);
+              saveStudyData();
+              currentConceptIndex = 0;
+              renderSubject();
+              showToast(`Imported "${file.name}" successfully!`);
+            } else {
+              showToast('Invalid backup file format.');
+            }
+          } catch (err) {
+            showToast('Error reading backup file.');
+          }
+        };
+        reader.readAsText(file);
+        inputImportCurriculum.value = '';
+      });
+    }
+
+    let resetArmed = false;
+    if (btnResetDefaults) {
+      btnResetDefaults.addEventListener('click', () => {
+        if (!resetArmed) {
+          resetArmed = true;
+          btnResetDefaults.textContent = 'Click to Confirm Reset';
+          btnResetDefaults.className = 'text-[11px] px-2 py-1 bg-rose-600 text-white rounded font-semibold transition';
+          showToast('Click "Click to Confirm Reset" again to wipe changes and restore defaults.');
+          setTimeout(() => {
+            resetArmed = false;
+            btnResetDefaults.textContent = 'Restore Defaults';
+            btnResetDefaults.className = 'text-[11px] px-2 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-300 font-semibold transition';
+          }, 4000);
+          return;
+        }
+        resetArmed = false;
+        btnResetDefaults.textContent = 'Restore Defaults';
+        btnResetDefaults.className = 'text-[11px] px-2 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded border border-emerald-300 font-semibold transition';
+        localStorage.removeItem('tutorhive_data_v1');
+        Object.assign(studyData, JSON.parse(JSON.stringify(defaultStudyData)));
+        saveStudyData();
+        currentConceptIndex = 0;
+        renderSubject();
+        showToast('Restored default curriculum content!');
+      });
+    }
+
+    btnCloseConceptModal.addEventListener('click', closeAddConceptModal);
+    btnCancelConcept.addEventListener('click', closeAddConceptModal);
+
+    // Form Submit: Add or Edit Concept
+    formAddConcept.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const editId = inputEditConceptId.value.trim();
+      const subKey = document.getElementById('input-concept-subject').value;
+      const topic = document.getElementById('input-concept-topic').value.trim();
+      const title = document.getElementById('input-concept-title').value.trim();
+      const grade = document.getElementById('input-concept-grade').value;
+      const summary = document.getElementById('input-concept-summary').value.trim();
+      const formula = document.getElementById('input-concept-formula').value.trim();
+      const formulaNote = document.getElementById('input-concept-formulanote').value.trim();
+      const tip = document.getElementById('input-concept-tip').value.trim();
+      const qprompt = document.getElementById('input-concept-qprompt').value.trim();
+      const opt0 = document.getElementById('input-concept-opt0').value.trim();
+      const opt1 = document.getElementById('input-concept-opt1').value.trim();
+      const opt2 = document.getElementById('input-concept-opt2').value.trim();
+      const correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value, 10);
+      const explanation = document.getElementById('input-concept-qexplanation').value.trim();
+
+      const conceptPayload = {
+        id: 'c_' + (editId ? editId.replace(/^c_/, '') : Date.now()),
+        topic: topic,
+        title: title,
+        grade: grade,
+        summary: summary,
+        formula: formula || 'Standard mathematical/scientific principle',
+        formulaNote: formulaNote || 'Key syllabus rule',
+        tip: tip || 'Review key exam past papers for this topic.',
+        question: qprompt,
+        options: [
+          { text: opt0, correct: correctIdx === 0 },
+          { text: opt1, correct: correctIdx === 1 },
+          { text: opt2, correct: correctIdx === 2 }
+        ],
+        explanation: explanation
+      };
+
+      if (editId) {
+        // Edit existing concept
+        let found = false;
+        // Check current subject first
+        const list = studyData[subKey].concepts || [];
+        const idx = list.findIndex(c => c.id === editId);
+        if (idx >= 0) {
+          list[idx] = conceptPayload;
+          found = true;
+        } else {
+          // It might have moved across subjects
+          ['maths', 'physics', 'mathlit'].forEach(k => {
+            const arr = studyData[k].concepts || [];
+            const i = arr.findIndex(c => c.id === editId);
+            if (i >= 0) {
+              arr.splice(i, 1);
+            }
+          });
+          studyData[subKey].concepts.push(conceptPayload);
+        }
+        saveStudyData();
+        closeAddConceptModal();
+        showToast(`Saved changes to "${title}"!`);
+        renderSubject();
+      } else {
+        // New concept
+        studyData[subKey].concepts.push(conceptPayload);
+        saveStudyData();
+        closeAddConceptModal();
+        showToast(`Concept "${title}" published to front-end!`);
+
+        if (currentSubject !== subKey) {
+          setSubject(subKey);
+        } else {
+          currentConceptIndex = studyData[subKey].concepts.length - 1;
+          renderSubject();
+        }
+      }
+      switchView('concepts');
+    });
+
+    // Modal Control: Add Material (Back-End Upload)
+    function openAddMaterialModal() {
+      document.getElementById('input-material-subject').value = currentSubject;
+      fileSelectedName.classList.add('hidden');
+      fileSelectedName.textContent = '';
+      modalAddMaterial.classList.remove('hidden');
+    }
+    function closeAddMaterialModal() {
+      modalAddMaterial.classList.add('hidden');
+      formAddMaterial.reset();
+      fileSelectedName.classList.add('hidden');
+    }
+
+    btnOpenAddMaterial.addEventListener('click', openAddMaterialModal);
+    btnAddMaterialTrigger.addEventListener('click', openAddMaterialModal);
+    btnCloseMaterialModal.addEventListener('click', closeAddMaterialModal);
+    btnCancelMaterial.addEventListener('click', closeAddMaterialModal);
+
+    btnSelectFile.addEventListener('click', () => {
+      inputMaterialFile.click();
+    });
+
+    dropzoneArea.addEventListener('click', (e) => {
+      if (e.target !== btnSelectFile) {
+        inputMaterialFile.click();
+      }
+    });
+
+    inputMaterialFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      fileSelectedName.textContent = `Attached: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+      fileSelectedName.classList.remove('hidden');
+
+      const titleInput = document.getElementById('input-material-title');
+      if (!titleInput.value) {
+        titleInput.value = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        if (text) {
+          document.getElementById('input-material-content').value = text;
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    formAddMaterial.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const subKey = document.getElementById('input-material-subject').value;
+      const type = document.getElementById('input-material-type').value;
+      const title = document.getElementById('input-material-title').value.trim();
+      const grade = document.getElementById('input-material-grade').value;
+      const duration = document.getElementById('input-material-duration').value.trim();
+      const desc = document.getElementById('input-material-desc').value.trim();
+      const content = document.getElementById('input-material-content').value.trim();
+
+      const newMaterial = {
+        id: 'mat_' + Date.now(),
+        title: title,
+        type: type,
+        grade: grade,
+        duration: duration || '15 min study',
+        desc: desc,
+        content: content
+      };
+
+      if (!studyData[subKey].materials) studyData[subKey].materials = [];
+      studyData[subKey].materials.push(newMaterial);
+      saveStudyData();
+
+      closeAddMaterialModal();
+      showToast(`Uploaded "${title}"! Available for front-end learners to download.`);
+
+      if (currentSubject !== subKey) {
+        setSubject(subKey);
+      } else {
+        renderMaterials();
+      }
+      switchView('materials');
+    });
+
+    // Initial Load & Render in Front-End Learner Mode
+    renderSubject();
+    setRole('learner');
+  </script>
+
+  <!-- Service Worker Registration for Offline CAPS Study -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Tutorhive Service Worker registered. Scope:', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>

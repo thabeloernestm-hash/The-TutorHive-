@@ -1,0 +1,26 @@
+{
+  "name": "The Tutorhive • STEM & Math Lit Learning Portal",
+  "short_name": "The Tutorhive",
+  "description": "CAPS FET Phase Mathematics, Physical Sciences & Mathematical Literacy revision, step-by-step solvers, and timed exam practice.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fffbeb",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "reference", "books"],
+  "lang": "en"
+}
